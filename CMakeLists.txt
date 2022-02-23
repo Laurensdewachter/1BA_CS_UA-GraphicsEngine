@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(engine)
+project(Engine)
 
 ############################################################
 # Set compiler flags
