@@ -18,7 +18,7 @@ set(engine_sources
 		utils/easy_image.cc
 	engine.cc
 		utils/ini_configuration.cc
-)
+		coordToPixel.h)
 
 ############################################################
 # Create an executable
