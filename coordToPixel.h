@@ -17,7 +17,7 @@ struct Line2D {
 
 using Lines2D = std::list<Line2D>;
 
-img::EasyImage coordToPixel(Lines2D &lines, double size) {
+img::EasyImage coordToPixel(Lines2D &lines, double size, img::Color backgroundColor) {
     std::list<Point2D> points;
     for (auto &i: lines) {
         points.push_back(i.p1);
@@ -48,7 +48,7 @@ img::EasyImage coordToPixel(Lines2D &lines, double size) {
     double dx = (imageX/2.0) - DCx;
     double dy = (imageY/2.0) - DCy;
 
-    img::EasyImage image(lround(imageX)+1, lround(imageY)+1);
+    img::EasyImage image(lround(imageX), lround(imageY), backgroundColor);
     for (auto &i : lines) {
         i.p1.x = i.p1.x * d + dx;
         i.p1.y = i.p1.y * d + dy;

@@ -18,11 +18,12 @@ set(engine_sources
 		utils/easy_image.cc
 	engine.cc
 		utils/ini_configuration.cc
-		coordToPixel.h)
+		coordToPixel.h
+		l_parser/l_parser.cc intro.h 2DLSystem.h)
 
 ############################################################
 # Create an executable
 ############################################################
-set(exe_name "engine")
+set(exe_name "Engine")
 add_executable( ${exe_name} ${engine_sources} )
 install( TARGETS ${exe_name} DESTINATION ${PROJECT_SOURCE_DIR}/ )
