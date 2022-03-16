@@ -1,8 +1,9 @@
 #include "utils/easy_image.h"
 #include "utils/ini_configuration.h"
-#include "coordToPixel.h"
-#include "intro.h"
+#include "CoordToPixel.h"
+#include "Intro.h"
 #include "2DLSystem.h"
+#include "3DLines.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -16,6 +17,8 @@ img::EasyImage generate_image(const ini::Configuration &configuration) {
     else if (type == "IntroBlocks") return intro::generate_blocks(configuration);
     else if (type == "IntroLines") return intro::generate_lines(configuration);
     else if (type == "2DLSystem") return LSystem2D::LSystem2D(configuration);
+    else // (type == "Wireframe");
+        return Lines3D::wireframe(configuration);
 }
 
 
