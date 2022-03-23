@@ -4,21 +4,22 @@
 #include "Intro.h"
 #include "2DLSystem.h"
 #include "3DLines.h"
+#include "PlatonicBodies.h"
 
 #include <iostream>
 #include <stdexcept>
 #include <string>
 
 
-img::EasyImage generate_image(const ini::Configuration &configuration) {
+img::EasyImage generate_image(const ini::Configuration &configuration, PlatonicBodies &bodies) {
     const std::string type = configuration["General"]["type"].as_string_or_die();
 
     if (type == "IntroColorRectangle") return intro::color_rectangle(configuration);
     else if (type == "IntroBlocks") return intro::generate_blocks(configuration);
     else if (type == "IntroLines") return intro::generate_lines(configuration);
     else if (type == "2DLSystem") return LSystem2D::LSystem2D(configuration);
-    else // (type == "Wireframe");
-        return Lines3D::wireframe(configuration);
+    else // if (type == "Wireframe");
+        return Lines3D::wireframe(configuration, bodies);
 }
 
 
@@ -35,6 +36,7 @@ int main(int argc, char const* argv[]) {
                                 args.push_back(filelistName);
                         }
                 }
+                PlatonicBodies bodies;
                 for(std::string fileName : args)
                 {
                         ini::Configuration conf;
@@ -51,7 +53,7 @@ int main(int argc, char const* argv[]) {
                                 continue;
                         }
 
-                        img::EasyImage image = generate_image(conf);
+                        img::EasyImage image = generate_image(conf, bodies);
                         if(image.get_height() > 0 && image.get_width() > 0)
                         {
                                 std::string::size_type pos = fileName.rfind('.');

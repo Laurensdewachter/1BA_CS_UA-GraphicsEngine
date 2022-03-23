@@ -6,7 +6,7 @@ void toPolar(const Vector3D &point, double &theta, double &phi, double &r) {
     phi = std::acos(point.z/r);
 }
 
-Matrix trans::scaleFigure(const double scale) {
+Matrix trans::scaleFigure(double scale) {
     Matrix S;
     S(1, 1) = scale;
     S(2, 2) = scale;
@@ -15,7 +15,7 @@ Matrix trans::scaleFigure(const double scale) {
     return S;
 }
 
-Matrix trans::rotateX(const double angle) {
+Matrix trans::rotateX(double angle) {
     Matrix Mx;
     Mx(2, 2) = cos(angle);
     Mx(2, 3) = sin(angle);
@@ -25,7 +25,7 @@ Matrix trans::rotateX(const double angle) {
     return Mx;
 }
 
-Matrix trans::rotateY(const double angle) {
+Matrix trans::rotateY(double angle) {
     Matrix My;
     My(1, 1) = cos(angle);
     My(1, 3) = -sin(angle);
@@ -35,7 +35,7 @@ Matrix trans::rotateY(const double angle) {
     return My;
 }
 
-Matrix trans::rotateZ(const double angle) {
+Matrix trans::rotateZ(double angle) {
     Matrix Mz;
     Mz(1, 1) = cos(angle);
     Mz(1, 2) = sin(angle);
@@ -78,7 +78,7 @@ void trans::applyTransformation(Figure &fig, const Matrix &M) {
     }
 }
 
-Point2D doProjection(const Vector3D &point, const double d) {
+Point2D doProjection(const Vector3D &point, double d) {
     return Point2D{(d*point.x)/(-point.z), (d*point.y)/(-point.z)};
 }
 
@@ -86,17 +86,193 @@ Lines2D doProjection(const Figures3D &figs) {
     Lines2D lines;
     for (auto i : figs) {
         for (auto j : i.faces) {
-            Line2D line;
-            line.p1 = doProjection(i.points[j.point_indexes[0]], 1);
-            line.p2 = doProjection(i.points[j.point_indexes[1]], 1);
-            line.color = i.color;
-            lines.push_back(line);
+            for (unsigned int k = 0; k < j.point_indexes.size(); k++) {
+                Line2D line;
+                if (k == j.point_indexes.size()-1) {
+                    line.p1 = doProjection(i.points[j.point_indexes[k]], 1);
+                    line.p2 = doProjection(i.points[j.point_indexes[0]], 1);
+                } else {
+                    line.p1 = doProjection(i.points[j.point_indexes[k]], 1);
+                    line.p2 = doProjection(i.points[j.point_indexes[k + 1]], 1);
+                }
+                line.color = i.color;
+                lines.push_back(line);
+            }
         }
     }
     return lines;
 }
 
-img::EasyImage Lines3D::wireframe(const ini::Configuration &configuration) {
+Figure eyeFigure(const ini::Configuration &configuration, std::string &figureName,
+               Matrix &V) {
+    const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
+    const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
+    const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
+    const double scale = configuration[figureName]["scale"].as_double_or_die();
+    std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
+    std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
+    const unsigned int nrPoints = configuration[figureName]["nrPoints"].as_int_or_die();
+    const unsigned int nrLines = configuration[figureName]["nrLines"].as_int_or_die();
+
+    Matrix S = trans::scaleFigure(scale);
+    Matrix rX = trans::rotateX((rotateX*M_PI)/180);
+    Matrix rY = trans::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = trans::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = trans::translate(Vector3D::point(center[0], center[1], center[2]));
+
+    Matrix F = S * rX * rY * rZ * T * V;
+
+    Figure fig;
+
+    img::Color colorElement(color[0]*255, color[1]*255, color[2]*255);
+    fig.color = colorElement;
+
+    for (unsigned int j = 0; j < nrPoints; j++) {
+        std::string pointName = "point" + std::to_string(j);
+
+        std::vector<double> point_vec = configuration[figureName][pointName].as_double_tuple_or_die();
+        fig.points.push_back(Vector3D::point(point_vec[0], point_vec[1], point_vec[2]));
+    }
+
+    for (unsigned int j = 0; j < nrLines; j++) {
+        std::string lineName = "line" + std::to_string(j);
+
+        std::vector<int> line_vec = configuration[figureName][lineName].as_int_tuple_or_die();
+        Face f(line_vec);
+        fig.faces.push_back(f);
+    }
+
+    trans::applyTransformation(fig, F);
+
+    return fig;
+}
+
+Figure createCube(const ini::Configuration &configuration, Figure body, std::string &figureName,
+                Matrix &V) {
+    const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
+    const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
+    const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
+    const double scale = configuration[figureName]["scale"].as_double_or_die();
+    std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
+    std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
+
+    Matrix S = trans::scaleFigure(scale);
+    Matrix rX = trans::rotateX((rotateX*M_PI)/180);
+    Matrix rY = trans::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = trans::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = trans::translate(Vector3D::point(center[0], center[1], center[2]));
+
+    Matrix F = S * rX * rY * rZ * T * V;
+
+    img::Color colorElement(color[0]*255, color[1]*255, color[2]*255);
+    body.color = colorElement;
+
+    trans::applyTransformation(body, F);
+
+    return body;
+}
+
+Figure createTetrahedron(const ini::Configuration &configuration, Figure body, std::string &figureName,
+                       Matrix &V) {
+    const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
+    const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
+    const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
+    const double scale = configuration[figureName]["scale"].as_double_or_die();
+    std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
+    std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
+
+    Matrix S = trans::scaleFigure(scale);
+    Matrix rX = trans::rotateX((rotateX*M_PI)/180);
+    Matrix rY = trans::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = trans::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = trans::translate(Vector3D::point(center[0], center[1], center[2]));
+
+    Matrix F = S * rX * rY * rZ * T * V;
+
+    img::Color colorElement(color[0]*255, color[1]*255, color[2]*255);
+    body.color = colorElement;
+
+    trans::applyTransformation(body, F);
+
+    return body;
+}
+
+Figure createOctahedron(const ini::Configuration &configuration, Figure body, std::string &figureName,
+                      Matrix &V) {
+    const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
+    const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
+    const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
+    const double scale = configuration[figureName]["scale"].as_double_or_die();
+    std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
+    std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
+
+    Matrix S = trans::scaleFigure(scale);
+    Matrix rX = trans::rotateX((rotateX*M_PI)/180);
+    Matrix rY = trans::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = trans::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = trans::translate(Vector3D::point(center[0], center[1], center[2]));
+
+    Matrix F = S * rX * rY * rZ * T * V;
+
+    img::Color colorElement(color[0]*255, color[1]*255, color[2]*255);
+    body.color = colorElement;
+
+    trans::applyTransformation(body, F);
+
+    return body;
+}
+
+Figure createIcosahedron(const ini::Configuration &configuration, Figure body, std::string &figureName,
+                       Matrix &V) {
+    const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
+    const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
+    const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
+    const double scale = configuration[figureName]["scale"].as_double_or_die();
+    std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
+    std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
+
+    Matrix S = trans::scaleFigure(scale);
+    Matrix rX = trans::rotateX((rotateX*M_PI)/180);
+    Matrix rY = trans::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = trans::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = trans::translate(Vector3D::point(center[0], center[1], center[2]));
+
+    Matrix F = S * rX * rY * rZ * T * V;
+
+    img::Color colorElement(color[0]*255, color[1]*255, color[2]*255);
+    body.color = colorElement;
+
+    trans::applyTransformation(body, F);
+
+    return body;
+}
+
+Figure createDodecahedron(const ini::Configuration &configuration, Figure body, std::string &figureName,
+                        Matrix &V) {
+    const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
+    const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
+    const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
+    const double scale = configuration[figureName]["scale"].as_double_or_die();
+    std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
+    std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
+
+    Matrix S = trans::scaleFigure(scale);
+    Matrix rX = trans::rotateX((rotateX*M_PI)/180);
+    Matrix rY = trans::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = trans::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = trans::translate(Vector3D::point(center[0], center[1], center[2]));
+
+    Matrix F = S * rX * rY * rZ * T * V;
+
+    img::Color colorElement(color[0]*255, color[1]*255, color[2]*255);
+    body.color = colorElement;
+
+    trans::applyTransformation(body, F);
+
+    return body;
+}
+
+img::EasyImage Lines3D::wireframe(const ini::Configuration &configuration, PlatonicBodies &bodies) {
 
     Figures3D figures;
 
@@ -112,47 +288,20 @@ img::EasyImage Lines3D::wireframe(const ini::Configuration &configuration) {
         std::string figureName = "Figure" + std::to_string(i);
 
         std::string type = configuration[figureName]["type"].as_string_or_die();
-        double rotateX = configuration[figureName]["rotateX"].as_int_or_die();
-        double rotateY = configuration[figureName]["rotateY"].as_int_or_die();
-        double rotateZ = configuration[figureName]["rotateZ"].as_int_or_die();
-        const double scale = configuration[figureName]["scale"].as_double_or_die();
-        std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
-        std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
-        const unsigned int nrPoints = configuration[figureName]["nrPoints"].as_int_or_die();
-        const unsigned int nrLines = configuration[figureName]["nrLines"].as_int_or_die();
 
-        Matrix S = trans::scaleFigure(scale);
-        Matrix rX = trans::rotateX((rotateX*M_PI)/180);
-        Matrix rY = trans::rotateY((rotateY*M_PI)/180);
-        Matrix rZ = trans::rotateZ((rotateZ*M_PI)/180);
-        Matrix T = trans::translate(Vector3D::point(center[0], center[1], center[2]));
-
-        Matrix F = S * rX * rY * rZ * T * V;
-
-        Figure fig;
-
-        img::Color colorElement(color[0]*255, color[1]*255, color[2]*255);
-        fig.color = colorElement;
-
-        for (unsigned int j = 0; j < nrPoints; j++) {
-            std::string pointName = "point" + std::to_string(j);
-
-            std::vector<double> point_vec = configuration[figureName][pointName].as_double_tuple_or_die();
-            fig.points.push_back(Vector3D::point(point_vec[0], point_vec[1], point_vec[2]));
+        if (type == "LineDrawing") {
+            figures.push_back(eyeFigure(configuration, figureName, V));
+        } else if (type == "Cube") {
+            figures.push_back(createCube(configuration, bodies.getCubeFigure(), figureName, V));
+        } else if (type == "Tetrahedron") {
+            figures.push_back(createTetrahedron(configuration, bodies.getTetrahedronFigure(), figureName, V));
+        } else if (type == "Octahedron") {
+            figures.push_back(createOctahedron(configuration, bodies.getOctahedronFigure(), figureName, V));
+        } else if (type == "Icosahedron") {
+            figures.push_back(createIcosahedron(configuration, bodies.getIcosahedronFigure(), figureName, V));
+        } else if (type == "Dodecahedron") {
+            figures.push_back(createDodecahedron(configuration, bodies.getDodecahedronFigure(), figureName, V));
         }
-
-        for (unsigned int j = 0; j < nrLines; j++) {
-            std::string lineName = "line" + std::to_string(j);
-
-            std::vector<int> line_vec = configuration[figureName][lineName].as_int_tuple_or_die();
-            Face f;
-            f.point_indexes = line_vec;
-            fig.faces.push_back(f);
-        }
-
-        trans::applyTransformation(fig, F);
-
-        figures.push_back(fig);
     }
 
     Lines2D lines = doProjection(figures);

@@ -21,7 +21,7 @@ set(engine_sources utils/easy_image.cc engine.cc
 		utils/vector/vector3d.cc
 		3DLines.cpp
 		CoordToPixel.cpp
-		Intro.cpp)
+		Intro.cpp 2DLSystem.cpp PlatonicBodies.cpp PlatonicBodies.h Figure.h)
 
 ############################################################
 # Create an executable
