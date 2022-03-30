@@ -6,7 +6,7 @@
 #include <vector>
 #include "utils/easy_image.h"
 #include "utils/ini_configuration.h"
-#include "utils/vector/vector3d.h"
+#include "utils/vector3d.h"
 #include "CoordToPixel.h"
 #include "PlatonicBodies.h"
 #include "Figure.h"

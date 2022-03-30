@@ -19,6 +19,7 @@
 #ifndef L_PARSER_INCLUDED
 #define L_PARSER_INCLUDED
 
+#include <vector>
 #include <map>
 #include <string>
 #include <set>
@@ -220,8 +221,9 @@ namespace LParser
 		public:
 			/**
 			 * \brief Constructor
-			 * */
+			 */
 			LSystem2D();
+
 			/**
 			 * \brief Copy Constructor
 			 *
@@ -235,7 +237,7 @@ namespace LParser
 			 */
 			LSystem2D(std::istream& in);
 
-			/*
+			/**
 			 * \brief Destructor
 			 */
 			virtual ~LSystem2D();
@@ -251,7 +253,7 @@ namespace LParser
 			 * \brief Returns the starting angle of the 2D L-System
 			 *
 			 * \return 	the starting angle of the L-System
-			 * */
+			 */
 			double get_starting_angle() const;
 
 		protected:
@@ -322,6 +324,85 @@ namespace LParser
 		private:
 			friend std::istream& operator>>(std::istream& in, LSystem3D& system);
 	};
+
+    class LSystem2DStochastic;
+
+    /**
+    * \brief Writes an stochastic LSystem to an output stream.
+    *
+    * \param out		The outputstream to write the stochastic LSystem to
+    * \param system	The stochastic L-System to be written
+    *
+    * \return		The outputstream the stochastic L-System was written to
+    */
+        std::ostream& operator<<(std::ostream& out, LSystem2DStochastic const& system);
+
+    /**
+     * \brief Reads an stochastic LSystem from an input stream.
+     *
+     * \param in		The input stream to read the stochastic LSystem from
+     * \param system	The L-System object in which the parsed stochastic LSystem is to be stored
+     *
+     * \return		The input stream from which stochastic the L-System was read
+     */
+    std::istream& operator>>(std::istream& in, LSystem2DStochastic& system);
+
+    /**
+     * \brief This class represents a stochastic 2D-LSystem
+     */
+    class LSystem2DStochastic : public LSystem
+    {
+        public:
+            /**
+            * \brief Constructor
+            */
+            LSystem2DStochastic();
+            /**
+            * \brief Copy Constructor
+            *
+            * \param system	The stochastic L-System to be copied
+            */
+            LSystem2DStochastic(LSystem2DStochastic const& system);
+            /**
+            * \brief Constructor: reads the LSystem from an input stream
+            *
+            * \param in		The input stream from which the L-System is to be read
+            */
+            LSystem2DStochastic(std::istream& in);
+            /**
+            * \brief Destructor
+            */
+                virtual ~LSystem2DStochastic();
+            /**
+            * \brief Assignment operator. Assigns another stochastic LSystem to this object
+            *
+            * \param system	The stochastic L-System to be assigned to this object
+            */
+                LSystem2DStochastic& operator=(LSystem2DStochastic const& system);
+            /**
+            * \brief Returns the starting angle of the 2D L-System
+            *
+            * \return 	the starting angle of the L-System
+            */
+                double get_starting_angle() const;
+            /**
+            * \brief Returns the chances of the replacement rules
+            *
+            * \return the chances of the stochastic L-System
+            */
+                std::map<char, std::vector<std::pair<std::string, double>>> get_chances() const;
+
+        protected:
+            friend std::istream& operator>>(std::istream& in, LSystem2DStochastic& system);
+            /**
+             * \brief The starting angle of the stochastic 2D-LSystem
+            */
+            double startingAngle;
+            /**
+             * \brief The chances for each replacement rule
+             */
+             std::map<char, std::vector<std::pair<std::string, double>>> chances;
+    };
 
 }
 

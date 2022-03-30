@@ -4,7 +4,7 @@
 #include <iostream>
 #include <list>
 #include <vector>
-#include "utils/vector/vector3d.h"
+#include "utils/vector3d.h"
 #include "utils/easy_image.h"
 
 struct Face {

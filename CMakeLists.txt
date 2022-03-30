@@ -16,9 +16,9 @@ set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${OWN_GXX_FLAGS}")
 ############################################################
 set(engine_sources utils/easy_image.cc engine.cc
 		utils/ini_configuration.cc
-        utils/l_parser/l_parser.cc
+		utils/l_parser.cc
 		2DLSystem.h
-		utils/vector/vector3d.cc
+        utils/vector3d.cc
 		3DLines.cpp
 		CoordToPixel.cpp
 		Intro.cpp 2DLSystem.cpp PlatonicBodies.cpp PlatonicBodies.h Figure.h)
@@ -26,6 +26,6 @@ set(engine_sources utils/easy_image.cc engine.cc
 ############################################################
 # Create an executable
 ############################################################
-set(exe_name "Engine")
+set(exe_name "engine")
 add_executable( ${exe_name} ${engine_sources} )
 install( TARGETS ${exe_name} DESTINATION ${PROJECT_SOURCE_DIR}/ )

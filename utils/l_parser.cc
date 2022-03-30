@@ -379,6 +379,46 @@ namespace
 			c = parser.getChar();
 		}
 	}
+    void parse_rules_stochastic(std::set<char> const& alphabet, std::map<char, std::vector<std::pair<std::string, double>>>& rules, stream_parser& parser, bool parse2D)
+    {
+        parser.skip_comments_and_whitespace();
+        parser.assertChars("Rules");
+        parser.skip_comments_and_whitespace();
+        parser.assertChars("=");
+        parser.skip_comments_and_whitespace();
+        parser.assertChars("{");
+        parser.skip_comments_and_whitespace();
+        rules.clear();
+        char c = parser.getChar();
+        while (true) {
+            if (!isalpha(c))
+                throw LParser::ParserException("Invalid Alphabet character", parser.getLine(), parser.getCol());
+            if (alphabet.find(c) == alphabet.end())
+                throw LParser::ParserException(std::string("Replacement rule specified for char '") + c + "' which is not part of the alphabet. ", parser.getLine(), parser.getCol());
+            char alphabet_char = c;
+            parser.skip_comments_and_whitespace();
+            parser.assertChars("->");
+            parser.skip_comments_and_whitespace();
+            std::string rule = parser.readQuotedString();
+            if (!isValidRule(alphabet, rule, parse2D))
+                throw LParser::ParserException(std::string("Invalid rule specification for entry '") + alphabet_char + "' in rule specification", parser.getLine(), parser.getCol());
+            parser.skip_comments_and_whitespace();
+            parser.assertChars(",");
+            parser.skip_comments_and_whitespace();
+            char i = parser.peekChar();
+            std::cout << i;
+            double chance = parser.readDouble();
+            rules[alphabet_char].push_back({rule, chance});
+            parser.skip_comments_and_whitespace();
+            c = parser.getChar();
+            if (c == '}')
+                break;
+            else if (c != ',')
+                throw LParser::ParserException("Expected ','", parser.getLine(), parser.getCol());
+            parser.skip_comments_and_whitespace();
+            c = parser.getChar();
+        }
+    }
 	std::string parse_initiator(std::set<char> const& alphabet, stream_parser& parser, bool parse2D)
 	{
 		std::string initiator;
@@ -588,4 +628,55 @@ LParser::LSystem3D& LParser::LSystem3D::operator=(LParser::LSystem3D const& syst
 {
 	LParser::LSystem::operator=(system);
 	return *this;
+}
+std::ostream& LParser::operator<<(std::ostream& out, LParser::LSystem2DStochastic const& system)
+{
+    print_system(out, system);
+    out << "StartingAngle = " << system.get_starting_angle() << std::endl;
+    out << "Iterations = " << system.get_nr_iterations() << std::endl;
+    return out;
+}
+std::istream& LParser::operator>>(std::istream& in, LParser::LSystem2DStochastic& system)
+{
+    stream_parser parser(in);
+    parse_alphabet(system.alphabet, parser);
+    parse_draw(system.alphabet, system.drawfunction, parser);
+    parse_rules_stochastic(system.alphabet, system.chances, parser, true);
+    system.initiator = parse_initiator(system.alphabet, parser, true);
+    system.angle = parse_angle(parser, "Angle");
+    system.startingAngle = parse_angle(parser, "StartingAngle");
+    system.nrIterations = parse_iterations(parser);
+
+    return in;
+}
+LParser::LSystem2DStochastic::LSystem2DStochastic() :
+        LSystem(), startingAngle(0.0), chances()
+{
+}
+LParser::LSystem2DStochastic::LSystem2DStochastic(LParser::LSystem2DStochastic const& system) :
+        LSystem(system), startingAngle(system.startingAngle), chances(system.chances)
+{
+}
+LParser::LSystem2DStochastic::LSystem2DStochastic(std::istream& in) :
+        LSystem(), startingAngle(0.0), chances()
+{
+    in >> *this;
+}
+LParser::LSystem2DStochastic::~LSystem2DStochastic()
+{
+}
+LParser::LSystem2DStochastic& LParser::LSystem2DStochastic::operator=(LParser::LSystem2DStochastic const& system)
+{
+    LParser::LSystem::operator=(system);
+    startingAngle = system.startingAngle;
+    chances = system.chances;
+    return *this;
+}
+double LParser::LSystem2DStochastic::get_starting_angle() const
+{
+    return startingAngle;
+}
+std::map<char, std::vector<std::pair<std::string, double>>> LParser::LSystem2DStochastic::get_chances() const
+{
+    return chances;
 }
