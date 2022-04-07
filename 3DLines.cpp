@@ -1,82 +1,7 @@
 #include "3DLines.h"
-
-void toPolar(const Vector3D &point, double &theta, double &phi, double &r) {
-    r = std::sqrt(std::pow(point.x, 2) + std::pow(point.y, 2) + std::pow(point.z, 2));
-    theta = std::atan2(point.y, point.x);
-    phi = std::acos(point.z/r);
-}
-
-Matrix trans::scaleFigure(double scale) {
-    Matrix S;
-    S(1, 1) = scale;
-    S(2, 2) = scale;
-    S(3, 3) = scale;
-
-    return S;
-}
-
-Matrix trans::rotateX(double angle) {
-    Matrix Mx;
-    Mx(2, 2) = cos(angle);
-    Mx(2, 3) = sin(angle);
-    Mx(3, 2) = -sin(angle);
-    Mx(3, 3) = cos(angle);
-
-    return Mx;
-}
-
-Matrix trans::rotateY(double angle) {
-    Matrix My;
-    My(1, 1) = cos(angle);
-    My(1, 3) = -sin(angle);
-    My(3, 1) = sin(angle);
-    My(3, 3) = cos(angle);
-
-    return My;
-}
-
-Matrix trans::rotateZ(double angle) {
-    Matrix Mz;
-    Mz(1, 1) = cos(angle);
-    Mz(1, 2) = sin(angle);
-    Mz(2, 1) = -sin(angle);
-    Mz(2, 2) = cos(angle);
-
-    return Mz;
-}
-
-Matrix trans::translate(const Vector3D &vec) {
-    Matrix T;
-    T(4, 1) = vec.x;
-    T(4, 2) = vec.y;
-    T(4, 3) = vec.z;
-
-    return T;
-}
-
-Matrix trans::eyePointTrans(const Vector3D &eyepoint) {
-    double theta, phi, r;
-    toPolar(eyepoint, theta, phi, r);
-
-    Matrix M;
-    M(1, 1) = -std::sin(theta);
-    M(1, 2) = -std::cos(theta) * std::cos(phi);
-    M(1, 3) = std::cos(theta) * std::sin(phi);
-    M(2, 1) = std::cos(theta);
-    M(2, 2) = -std::sin(theta) * std::cos(phi);
-    M(2, 3) = std::sin(theta) * std::sin(phi);
-    M(3, 2) = std::sin(phi);
-    M(3, 3) = std::cos(phi);
-    M(4, 3) = -r;
-
-    return M;
-}
-
-void trans::applyTransformation(Figure &fig, const Matrix &M) {
-    for (auto &j : fig.points) {
-        j *= M;
-    }
-}
+#include "utils/Transformation.h"
+#include "utils/Utils.h"
+#include "LSystems/3DLSystem.h"
 
 Point2D doProjection(const Vector3D &point, double d) {
     return Point2D{(d*point.x)/(-point.z), (d*point.y)/(-point.z)};
@@ -114,11 +39,11 @@ Figure eyeFigure(const ini::Configuration &configuration, std::string &figureNam
     const unsigned int nrPoints = configuration[figureName]["nrPoints"].as_int_or_die();
     const unsigned int nrLines = configuration[figureName]["nrLines"].as_int_or_die();
 
-    Matrix S = trans::scaleFigure(scale);
-    Matrix rX = trans::rotateX((rotateX*M_PI)/180);
-    Matrix rY = trans::rotateY((rotateY*M_PI)/180);
-    Matrix rZ = trans::rotateZ((rotateZ*M_PI)/180);
-    Matrix T = trans::translate(Vector3D::point(center[0], center[1], center[2]));
+    Matrix S = Transformation::scaleFigure(scale);
+    Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
+    Matrix rY = Transformation::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = Transformation::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = Transformation::translate(Vector3D::point(center[0], center[1], center[2]));
 
     Matrix F = S * rX * rY * rZ * T * V;
 
@@ -142,12 +67,12 @@ Figure eyeFigure(const ini::Configuration &configuration, std::string &figureNam
         fig.faces.push_back(f);
     }
 
-    trans::applyTransformation(fig, F);
+    Transformation::applyTransformation(fig, F);
 
     return fig;
 }
 
-Figure createCube(const ini::Configuration &configuration, Figure body, std::string &figureName,
+Figure createCube(const ini::Configuration &configuration, std::string &figureName,
                 Matrix &V) {
     const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
     const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
@@ -156,23 +81,25 @@ Figure createCube(const ini::Configuration &configuration, Figure body, std::str
     std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
     std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
 
-    Matrix S = trans::scaleFigure(scale);
-    Matrix rX = trans::rotateX((rotateX*M_PI)/180);
-    Matrix rY = trans::rotateY((rotateY*M_PI)/180);
-    Matrix rZ = trans::rotateZ((rotateZ*M_PI)/180);
-    Matrix T = trans::translate(Vector3D::point(center[0], center[1], center[2]));
+    Matrix S = Transformation::scaleFigure(scale);
+    Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
+    Matrix rY = Transformation::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = Transformation::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = Transformation::translate(Vector3D::point(center[0], center[1], center[2]));
 
     Matrix F = S * rX * rY * rZ * T * V;
 
+    Figure fig = PlatonicBodies::getCubeFigure();
+
     img::Color colorElement(color[0]*255, color[1]*255, color[2]*255);
-    body.color = colorElement;
+    fig.color = colorElement;
 
-    trans::applyTransformation(body, F);
+    Transformation::applyTransformation(fig, F);
 
-    return body;
+    return fig;
 }
 
-Figure createTetrahedron(const ini::Configuration &configuration, Figure body, std::string &figureName,
+Figure createTetrahedron(const ini::Configuration &configuration, std::string &figureName,
                        Matrix &V) {
     const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
     const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
@@ -181,23 +108,25 @@ Figure createTetrahedron(const ini::Configuration &configuration, Figure body, s
     std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
     std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
 
-    Matrix S = trans::scaleFigure(scale);
-    Matrix rX = trans::rotateX((rotateX*M_PI)/180);
-    Matrix rY = trans::rotateY((rotateY*M_PI)/180);
-    Matrix rZ = trans::rotateZ((rotateZ*M_PI)/180);
-    Matrix T = trans::translate(Vector3D::point(center[0], center[1], center[2]));
+    Matrix S = Transformation::scaleFigure(scale);
+    Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
+    Matrix rY = Transformation::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = Transformation::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = Transformation::translate(Vector3D::point(center[0], center[1], center[2]));
 
     Matrix F = S * rX * rY * rZ * T * V;
 
+    Figure fig = PlatonicBodies::getTetrahedronFigure();
+
     img::Color colorElement(color[0]*255, color[1]*255, color[2]*255);
-    body.color = colorElement;
+    fig.color = colorElement;
 
-    trans::applyTransformation(body, F);
+    Transformation::applyTransformation(fig, F);
 
-    return body;
+    return fig;
 }
 
-Figure createOctahedron(const ini::Configuration &configuration, Figure body, std::string &figureName,
+Figure createOctahedron(const ini::Configuration &configuration, std::string &figureName,
                       Matrix &V) {
     const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
     const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
@@ -206,23 +135,25 @@ Figure createOctahedron(const ini::Configuration &configuration, Figure body, st
     std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
     std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
 
-    Matrix S = trans::scaleFigure(scale);
-    Matrix rX = trans::rotateX((rotateX*M_PI)/180);
-    Matrix rY = trans::rotateY((rotateY*M_PI)/180);
-    Matrix rZ = trans::rotateZ((rotateZ*M_PI)/180);
-    Matrix T = trans::translate(Vector3D::point(center[0], center[1], center[2]));
+    Matrix S = Transformation::scaleFigure(scale);
+    Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
+    Matrix rY = Transformation::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = Transformation::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = Transformation::translate(Vector3D::point(center[0], center[1], center[2]));
 
     Matrix F = S * rX * rY * rZ * T * V;
 
+    Figure fig = PlatonicBodies::getOctahedronFigure();
+
     img::Color colorElement(color[0]*255, color[1]*255, color[2]*255);
-    body.color = colorElement;
+    fig.color = colorElement;
 
-    trans::applyTransformation(body, F);
+    Transformation::applyTransformation(fig, F);
 
-    return body;
+    return fig;
 }
 
-Figure createIcosahedron(const ini::Configuration &configuration, Figure body, std::string &figureName,
+Figure createIcosahedron(const ini::Configuration &configuration, std::string &figureName,
                        Matrix &V) {
     const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
     const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
@@ -231,23 +162,25 @@ Figure createIcosahedron(const ini::Configuration &configuration, Figure body, s
     std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
     std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
 
-    Matrix S = trans::scaleFigure(scale);
-    Matrix rX = trans::rotateX((rotateX*M_PI)/180);
-    Matrix rY = trans::rotateY((rotateY*M_PI)/180);
-    Matrix rZ = trans::rotateZ((rotateZ*M_PI)/180);
-    Matrix T = trans::translate(Vector3D::point(center[0], center[1], center[2]));
+    Matrix S = Transformation::scaleFigure(scale);
+    Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
+    Matrix rY = Transformation::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = Transformation::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = Transformation::translate(Vector3D::point(center[0], center[1], center[2]));
 
     Matrix F = S * rX * rY * rZ * T * V;
 
+    Figure fig = PlatonicBodies::getIcosahedronFigure();
+
     img::Color colorElement(color[0]*255, color[1]*255, color[2]*255);
-    body.color = colorElement;
+    fig.color = colorElement;
 
-    trans::applyTransformation(body, F);
+    Transformation::applyTransformation(fig, F);
 
-    return body;
+    return fig;
 }
 
-Figure createDodecahedron(const ini::Configuration &configuration, Figure body, std::string &figureName,
+Figure createDodecahedron(const ini::Configuration &configuration, std::string &figureName,
                         Matrix &V) {
     const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
     const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
@@ -256,23 +189,199 @@ Figure createDodecahedron(const ini::Configuration &configuration, Figure body, 
     std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
     std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
 
-    Matrix S = trans::scaleFigure(scale);
-    Matrix rX = trans::rotateX((rotateX*M_PI)/180);
-    Matrix rY = trans::rotateY((rotateY*M_PI)/180);
-    Matrix rZ = trans::rotateZ((rotateZ*M_PI)/180);
-    Matrix T = trans::translate(Vector3D::point(center[0], center[1], center[2]));
+    Matrix S = Transformation::scaleFigure(scale);
+    Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
+    Matrix rY = Transformation::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = Transformation::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = Transformation::translate(Vector3D::point(center[0], center[1], center[2]));
 
     Matrix F = S * rX * rY * rZ * T * V;
 
+    Figure fig = PlatonicBodies::getDodecahedronFigure();
+
     img::Color colorElement(color[0]*255, color[1]*255, color[2]*255);
-    body.color = colorElement;
+    fig.color = colorElement;
 
-    trans::applyTransformation(body, F);
+    Transformation::applyTransformation(fig, F);
 
-    return body;
+    return fig;
 }
 
-img::EasyImage Lines3D::wireframe(const ini::Configuration &configuration, PlatonicBodies &bodies) {
+Figure createSphere(const ini::Configuration &configuration, std::string &figureName, Matrix &V) {
+    const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
+    const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
+    const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
+    const double scale = configuration[figureName]["scale"].as_double_or_die();
+    std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
+    std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
+    const unsigned int n = configuration[figureName]["n"].as_int_or_die();
+
+    Matrix S = Transformation::scaleFigure(scale);
+    Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
+    Matrix rY = Transformation::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = Transformation::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = Transformation::translate(Vector3D::point(center[0], center[1], center[2]));
+
+    Matrix F = S * rX * rY * rZ * T * V;
+
+    Figure fig = PlatonicBodies::getIcosahedronFigure();
+
+    img::Color colorElement(color[0]*255, color[1]*255, color[2]*255);
+    fig.color = colorElement;
+
+    for (unsigned int i = 0; i < n; i++) {
+        Utils::splitTriangles(fig);
+    }
+
+    for (auto & point : fig.points) point.normalise();
+
+    Transformation::applyTransformation(fig, F);
+
+    return fig;
+}
+
+Figure createCone(const ini::Configuration &configuration, std::string &figureName, Matrix &V) {
+    const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
+    const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
+    const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
+    const double scale = configuration[figureName]["scale"].as_double_or_die();
+    std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
+    std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
+    const int n = configuration[figureName]["n"].as_int_or_die();
+    const double height = configuration[figureName]["height"].as_double_or_die();
+
+    Matrix S = Transformation::scaleFigure(scale);
+    Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
+    Matrix rY = Transformation::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = Transformation::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = Transformation::translate(Vector3D::point(center[0], center[1], center[2]));
+
+    Matrix F = S * rX * rY * rZ * T * V;
+
+    Figure fig;
+
+    img::Color colorElement(color[0]*255, color[1]*255, color[2]*255);
+    fig.color = colorElement;
+
+    for (int i = 0; i < n; i++) {
+        fig.points.push_back(Vector3D::point(cos((2*M_PI*i)/n), sin((2*M_PI*i)/n), 0));
+    }
+    fig.points.push_back(Vector3D::point(0, 0, height));
+
+    Face ground;
+    for (int i = 0; i < n; i++) {
+        Face face({i, (i+1)%n, n});
+        fig.faces.push_back(face);
+
+        ground.point_indexes.push_back(n-i-1);
+    }
+    fig.faces.push_back(ground);
+
+    Transformation::applyTransformation(fig, F);
+
+    return fig;
+}
+
+Figure createCylinder(const ini::Configuration &configuration, std::string &figureName, Matrix &V) {
+    const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
+    const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
+    const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
+    const double scale = configuration[figureName]["scale"].as_double_or_die();
+    std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
+    std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
+    const int n = configuration[figureName]["n"].as_int_or_die();
+    const double height = configuration[figureName]["height"].as_double_or_die();
+
+    Matrix S = Transformation::scaleFigure(scale);
+    Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
+    Matrix rY = Transformation::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = Transformation::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = Transformation::translate(Vector3D::point(center[0], center[1], center[2]));
+
+    Matrix F = S * rX * rY * rZ * T * V;
+
+    Figure fig;
+
+    img::Color colorElement(color[0]*255, color[1]*255, color[2]*255);
+    fig.color = colorElement;
+
+    for (int i = 0; i < n; i++) {
+        fig.points.push_back(Vector3D::point(cos((2*M_PI*i)/n), sin((2*M_PI*i)/n), 0));
+    }
+    for (int i = 0; i < n; i++) {
+        fig.points.push_back(Vector3D::point(cos((2*M_PI*i)/n), sin((2*M_PI*i)/n), height));
+    }
+
+    for (int i = 0; i < n-1; i++) {
+        Face face({i, (i+1)%n, (i+n+1)%(2*n), n+i});
+        fig.faces.push_back(face);
+    }
+    Face lastSquare({n-1, 0, n, (2*n)-1});
+    fig.faces.push_back(lastSquare);
+
+    Face ground;
+    Face roof;
+    for (int i = n-1; i >= 0; i--) ground.point_indexes.push_back(i);
+    for (int i = (2*n)-1; i >= n; i--) roof.point_indexes.push_back(i);
+    fig.faces.push_back(ground);
+    fig.faces.push_back(roof);
+
+    Transformation::applyTransformation(fig, F);
+
+    return fig;
+}
+
+Figure createTorus(const ini::Configuration &configuration, std::string &figureName, Matrix &V) {
+    const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
+    const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
+    const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
+    const double scale = configuration[figureName]["scale"].as_double_or_die();
+    std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
+    std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
+    const int n = configuration[figureName]["n"].as_int_or_die();
+    const int m = configuration[figureName]["m"].as_int_or_die();
+    const double R = configuration[figureName]["R"].as_double_or_die();
+    const double r = configuration[figureName]["r"].as_double_or_die();
+
+    Matrix S = Transformation::scaleFigure(scale);
+    Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
+    Matrix rY = Transformation::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = Transformation::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = Transformation::translate(Vector3D::point(center[0], center[1], center[2]));
+
+    Matrix F = S * rX * rY * rZ * T * V;
+
+    Figure fig;
+
+    img::Color colorElement(color[0]*255, color[1]*255, color[2]*255);
+    fig.color = colorElement;
+
+    std::vector<std::vector<int>> pointTracker(n, std::vector<int>(m, 0));
+    int loopCounter = 0;
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            fig.points.push_back(Vector3D::point(cos((2*M_PI*i)/n)*(R+ cos((2*M_PI*j)/n)),
+                                                 sin((2*M_PI*i)/n)*(R+ cos((2*M_PI*j)/n)),
+                                                 r* sin((2*M_PI*j)/n)));
+            pointTracker[i][j] = loopCounter;
+            loopCounter++;
+        }
+    }
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            Face face({pointTracker[i][j], pointTracker[(i+1)%n][j], pointTracker[(i+1)%n][(j+1)%m], pointTracker[i][(j+1)%m]});
+            fig.faces.push_back(face);
+        }
+    }
+
+    Transformation::applyTransformation(fig, F);
+
+    return fig;
+}
+
+img::EasyImage Lines3D::wireframe(const ini::Configuration &configuration) {
 
     Figures3D figures;
 
@@ -282,7 +391,7 @@ img::EasyImage Lines3D::wireframe(const ini::Configuration &configuration, Plato
     const unsigned int nrFigures = configuration["General"]["nrFigures"].as_int_or_die();
     std::vector<double> eye = configuration["General"]["eye"].as_double_tuple_or_die();
 
-    Matrix V = trans::eyePointTrans(Vector3D::point(eye[0], eye[1], eye[2]));
+    Matrix V = Transformation::eyePointTrans(Vector3D::point(eye[0], eye[1], eye[2]));
 
     for (unsigned int i = 0; i < nrFigures; i++) {
         std::string figureName = "Figure" + std::to_string(i);
@@ -292,15 +401,25 @@ img::EasyImage Lines3D::wireframe(const ini::Configuration &configuration, Plato
         if (type == "LineDrawing") {
             figures.push_back(eyeFigure(configuration, figureName, V));
         } else if (type == "Cube") {
-            figures.push_back(createCube(configuration, bodies.getCubeFigure(), figureName, V));
+            figures.push_back(createCube(configuration, figureName, V));
         } else if (type == "Tetrahedron") {
-            figures.push_back(createTetrahedron(configuration, bodies.getTetrahedronFigure(), figureName, V));
+            figures.push_back(createTetrahedron(configuration, figureName, V));
         } else if (type == "Octahedron") {
-            figures.push_back(createOctahedron(configuration, bodies.getOctahedronFigure(), figureName, V));
+            figures.push_back(createOctahedron(configuration, figureName, V));
         } else if (type == "Icosahedron") {
-            figures.push_back(createIcosahedron(configuration, bodies.getIcosahedronFigure(), figureName, V));
+            figures.push_back(createIcosahedron(configuration, figureName, V));
         } else if (type == "Dodecahedron") {
-            figures.push_back(createDodecahedron(configuration, bodies.getDodecahedronFigure(), figureName, V));
+            figures.push_back(createDodecahedron(configuration, figureName, V));
+        } else if (type == "Sphere") {
+            figures.push_back(createSphere(configuration, figureName, V));
+        } else if (type == "Cone") {
+            figures.push_back(createCone(configuration, figureName, V));
+        } else if (type == "Cylinder") {
+            figures.push_back(createCylinder(configuration, figureName, V));
+        } else if (type == "Torus") {
+            figures.push_back(createTorus(configuration, figureName, V));
+        } else if (type == "3DLSystem") {
+            figures.push_back(LSystem3D::LSystem3D(configuration, figureName, V));
         }
     }
 

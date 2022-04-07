@@ -17,4 +17,4 @@ namespace intro {
     img::EasyImage generate_lines(const ini::Configuration &configuration);
 }
 
-#endif //ENGINE_INTRO_H
+#endif

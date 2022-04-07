@@ -17,11 +17,15 @@ set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${OWN_GXX_FLAGS}")
 set(engine_sources utils/easy_image.cc engine.cc
 		utils/ini_configuration.cc
 		utils/l_parser.cc
-		2DLSystem.h
+        LSystems/2DLSystem.h
         utils/vector3d.cc
 		3DLines.cpp
 		CoordToPixel.cpp
-		Intro.cpp 2DLSystem.cpp PlatonicBodies.cpp PlatonicBodies.h Figure.h)
+		Intro.cpp LSystems/2DLSystem.cpp
+		utils/PlatonicBodies.cpp
+		utils/PlatonicBodies.h
+		Figure.h
+		utils/Transformation.cpp utils/Transformation.h utils/Utils.cpp utils/Utils.h LSystems/3DLSystem.h LSystems/3DLSystem.cpp)
 
 ############################################################
 # Create an executable
