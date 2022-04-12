@@ -9,7 +9,7 @@
 #include "utils/vector3d.h"
 #include "CoordToPixel.h"
 #include "utils/PlatonicBodies.h"
-#include "Figure.h"
+#include "utils/Figure.h"
 
 Point2D doProjection(const Vector3D &point, double d);
 

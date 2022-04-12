@@ -24,7 +24,7 @@ set(engine_sources utils/easy_image.cc engine.cc
 		Intro.cpp LSystems/2DLSystem.cpp
 		utils/PlatonicBodies.cpp
 		utils/PlatonicBodies.h
-		Figure.h
+		utils/Figure.h
 		utils/Transformation.cpp utils/Transformation.h utils/Utils.cpp utils/Utils.h LSystems/3DLSystem.h LSystems/3DLSystem.cpp utils/ZBuffer.h)
 
 ############################################################

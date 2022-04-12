@@ -1,7 +1,7 @@
 #ifndef ENGINE_3DLSYSTEM_H
 #define ENGINE_3DLSYSTEM_H
 
-#include "../Figure.h"
+#include "../utils/Figure.h"
 #include "../utils/ini_configuration.h"
 #include "../utils/vector3d.h"
 

@@ -4,8 +4,8 @@
 #include <iostream>
 #include <list>
 #include <vector>
-#include "utils/vector3d.h"
-#include "utils/easy_image.h"
+#include "vector3d.h"
+#include "easy_image.h"
 
 struct Face {
     std::vector<int> point_indexes;

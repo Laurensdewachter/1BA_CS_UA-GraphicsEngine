@@ -1,7 +1,7 @@
 #ifndef ENGINE_TRANSFORMATION_H
 #define ENGINE_TRANSFORMATION_H
 
-#include "../Figure.h"
+#include "Figure.h"
 #include "vector3d.h"
 
 namespace Transformation {

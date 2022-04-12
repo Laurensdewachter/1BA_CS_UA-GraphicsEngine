@@ -2,7 +2,7 @@
 #define ENGINE_UTILS_H
 
 #include "vector3d.h"
-#include "../Figure.h"
+#include "Figure.h"
 
 class Utils {
 public:

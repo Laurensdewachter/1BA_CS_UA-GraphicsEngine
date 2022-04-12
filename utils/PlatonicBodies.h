@@ -2,7 +2,7 @@
 #define ENGINE_PLATONICBODIES_H
 
 #include <cmath>
-#include "../Figure.h"
+#include "Figure.h"
 
 class PlatonicBodies {
 public:
