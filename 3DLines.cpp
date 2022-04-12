@@ -16,9 +16,15 @@ Lines2D doProjection(const Figures3D &figs) {
                 if (k == j.point_indexes.size()-1) {
                     line.p1 = doProjection(i.points[j.point_indexes[k]], 1);
                     line.p2 = doProjection(i.points[j.point_indexes[0]], 1);
+
+                    line.z1 = i.points[j.point_indexes[k]].z;
+                    line.z2 = i.points[j.point_indexes[0]].z;
                 } else {
                     line.p1 = doProjection(i.points[j.point_indexes[k]], 1);
-                    line.p2 = doProjection(i.points[j.point_indexes[k + 1]], 1);
+                    line.p2 = doProjection(i.points[j.point_indexes[k+1]], 1);
+
+                    line.z1 = i.points[j.point_indexes[k]].z;
+                    line.z2 = i.points[j.point_indexes[k+1]].z;
                 }
                 line.color = i.color;
                 lines.push_back(line);

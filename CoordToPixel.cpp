@@ -1,4 +1,5 @@
 #include "CoordToPixel.h"
+#include "utils/ZBuffer.h"
 
 img::EasyImage coordToPixel(Lines2D &lines, double size, img::Color backgroundColor) {
     std::list<Point2D> points;
@@ -32,13 +33,16 @@ img::EasyImage coordToPixel(Lines2D &lines, double size, img::Color backgroundCo
     double dy = (imageY/2.0) - DCy;
 
     img::EasyImage image(lround(imageX), lround(imageY), backgroundColor);
+
+    ZBuffer buffer(image.get_width(), image.get_height());
+
     for (auto &i : lines) {
         i.p1.x = i.p1.x * d + dx;
         i.p1.y = i.p1.y * d + dy;
         i.p2.x = i.p2.x * d + dx;
         i.p2.y = i.p2.y * d + dy;
 
-        image.draw_line(lround(i.p1.x), lround(i.p1.y), lround(i.p2.x), lround(i.p2.y), i.color);
+        image.draw_zbuf_line(buffer, lround(i.p1.x), lround(i.p1.y), i.z1, lround(i.p2.x), lround(i.p2.y), i.z2, i.color);
     }
     return image;
 }

@@ -25,7 +25,7 @@ set(engine_sources utils/easy_image.cc engine.cc
 		utils/PlatonicBodies.cpp
 		utils/PlatonicBodies.h
 		Figure.h
-		utils/Transformation.cpp utils/Transformation.h utils/Utils.cpp utils/Utils.h LSystems/3DLSystem.h LSystems/3DLSystem.cpp)
+		utils/Transformation.cpp utils/Transformation.h utils/Utils.cpp utils/Utils.h LSystems/3DLSystem.h LSystems/3DLSystem.cpp utils/ZBuffer.h)
 
 ############################################################
 # Create an executable

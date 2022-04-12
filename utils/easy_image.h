@@ -20,6 +20,7 @@
 #include <stdint.h>
 #include <vector>
 #include <iostream>
+#include "ZBuffer.h"
 /**
  * \brief The namespace of the EasyImage class
  */
@@ -219,6 +220,23 @@ namespace img
 			 * 	assert(y1 < getHeight())
 			 */
 			void draw_line(unsigned int x0, unsigned int y0, unsigned int x1, unsigned int y1, Color color);
+
+            /**
+             * \brief Draws a line from pixel (x0,y0) to pixel (x1,y1) using a Z-Buffer
+             * \param x0	the x coordinate of the first pixel
+			 * \param y0	the y coordinate of the first pixel
+			 * \param x1	the x coordinate of the second pixel
+			 * \param y1	the y coordinate of the second pixel
+			 * \param color	the color of the line
+			 *
+			 * These assertions apply:
+			 *	assert(x0 < getWidth())
+			 * 	assert(y0 < getHeight())
+			 * 	assert(x1 < getWidth())
+			 * 	assert(y1 < getHeight())
+             */
+             void draw_zbuf_line(ZBuffer &buffer, unsigned int x0, unsigned int y0, double z0,
+                                 unsigned int x1, unsigned int y1, double z1, const Color &color);
 
 		private:
 			friend std::istream& operator>>(std::istream& in, EasyImage & image);

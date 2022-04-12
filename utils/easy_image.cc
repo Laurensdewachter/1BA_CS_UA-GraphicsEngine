@@ -257,6 +257,113 @@ void img::EasyImage::draw_line(unsigned int x0, unsigned int y0, unsigned int x1
 		}
 	}
 }
+void img::EasyImage::draw_zbuf_line(ZBuffer &buffer, unsigned int x0, unsigned int y0, double z0,
+                                    unsigned int x1, unsigned int y1, double z1, const Color &color) {
+    assert(x0 < this->width && y0 < this->height);
+    assert(x1 < this->width && y1 < this->height);
+
+    if (x0 == x1 && y0 == y1) {
+        double cur_z_value = buffer[x0][y0];
+        double new_z_value = (1/z0) + (1/z1);
+
+        if (new_z_value < cur_z_value) {
+            (*this)(x0, y0) = color;
+            buffer[x0][y0] = new_z_value;
+        }
+    }
+    else if (x0 == x1)
+    {
+        //special case for x0 == x1
+        unsigned int a = std::max(y0, y1) - std::min(y0, y1);
+        unsigned int k = 0;
+        for (unsigned int i = std::min(y0, y1); i <= std::max(y0, y1); i++)
+        {
+            double cur_z_value = buffer[x0][i];
+            double new_z_value = (((a-k)/a)/z0) + ((1-((a-k)/a))/z1);
+            k++;
+
+            if (new_z_value < cur_z_value) {
+                (*this)(x0, i) = color;
+                buffer[x0][i] = new_z_value;
+            }
+        }
+    }
+    else if (y0 == y1)
+    {
+        //special case for y0 == y1
+        unsigned int a = std::max(x0, x1) - std::min(x0, x1);
+        unsigned int k = 0;
+        for (unsigned int i = std::min(x0, x1); i <= std::max(x0, x1); i++)
+        {
+            double cur_z_value = buffer[i][y0];
+            double new_z_value = (((a-k)/a)/z0) + ((1-((a-k)/a))/z1);
+            k++;
+
+            if (new_z_value < cur_z_value) {
+                (*this)(i, y0) = color;
+                buffer[i][y0] = new_z_value;
+            }
+        }
+    }
+    else
+    {
+        if (x0 > x1)
+        {
+            //flip points if x1>x0: we want x0 to have the lowest value
+            std::swap(x0, x1);
+            std::swap(y0, y1);
+        }
+        double m = ((double) y1 - (double) y0) / ((double) x1 - (double) x0);
+        if (-1.0 <= m && m <= 1.0)
+        {
+            unsigned int a = x1-x0;
+            unsigned int k = 0;
+            for (unsigned int i = 0; i <= (x1 - x0); i++)
+            {
+                double cur_z_value = buffer[x0+i][(unsigned int) round(y0 + m * i)];
+                double new_z_value = (((a-k)/a)/z0) + ((1-((a-k)/a))/z1);
+                k++;
+
+                if (new_z_value < cur_z_value) {
+                    (*this)(x0 + i, (unsigned int) round(y0 + m * i)) = color;
+                    buffer[x0+i][(unsigned int) round(y0 + m * i)] = new_z_value;
+                }
+            }
+        }
+        else if (m > 1.0)
+        {
+            unsigned int a = y1-y0;
+            unsigned int k = 0;
+            for (unsigned int i = 0; i <= (y1 - y0); i++)
+            {
+                double cur_z_value = buffer[(unsigned int) round(x0 + (i / m))][y0 + i];
+                double new_z_value = (((a-k)/a)/z0) + ((1-((a-k)/a))/z1);
+                k++;
+
+                if (new_z_value < cur_z_value) {
+                    (*this)((unsigned int) round(x0 + (i / m)), y0 + i) = color;
+                    buffer[(unsigned int) round(x0 + (i / m))][y0 + i] = new_z_value;
+                }
+            }
+        }
+        else if (m < -1.0)
+        {
+            unsigned int a = y0-y1;
+            unsigned int k = 0;
+            for (unsigned int i = 0; i <= (y0 - y1); i++)
+            {
+                double cur_z_value = buffer[(unsigned int) round(x0 - (i / m))][y0 - i];
+                double new_z_value = (((a-k)/a)/z0) + ((1-((a-k)/a))/z1);
+                k++;
+
+                if (new_z_value < cur_z_value) {
+                    (*this)((unsigned int) round(x0 - (i / m)), y0 - i) = color;
+                    buffer[(unsigned int) round(x0 - (i / m))][y0 - i] = new_z_value;
+                }
+            }
+        }
+    }
+}
 std::ostream& img::operator<<(std::ostream& out, EasyImage const& image)
 {
 
