@@ -8,6 +8,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <chrono>
 
 img::EasyImage generate_image(const ini::Configuration &configuration) {
     const std::string type = configuration["General"]["type"].as_string_or_die();
@@ -16,8 +17,9 @@ img::EasyImage generate_image(const ini::Configuration &configuration) {
     else if (type == "IntroBlocks") return intro::generate_blocks(configuration);
     else if (type == "IntroLines") return intro::generate_lines(configuration);
     else if (type == "2DLSystem") return LSystem2D::LSystem2D(configuration);
-    else // if (type == "Wireframe");
-        return Lines3D::wireframe(configuration);
+    else if (type == "Wireframe") return Lines3D::wireframe(configuration);
+    else if (type == "ZBufferedWireframe") return Lines3D::zBufferWireframe(configuration);
+    else return Lines3D::zBuffer(configuration);
 }
 
 
@@ -34,6 +36,7 @@ int main(int argc, char const* argv[]) {
                                 args.push_back(filelistName);
                         }
                 }
+                auto start = std::chrono::high_resolution_clock::now();
                 for(std::string fileName : args)
                 {
                         ini::Configuration conf;
@@ -49,7 +52,6 @@ int main(int argc, char const* argv[]) {
                                 retVal = 1;
                                 continue;
                         }
-
                         img::EasyImage image = generate_image(conf);
                         if(image.get_height() > 0 && image.get_width() > 0)
                         {
@@ -80,6 +82,10 @@ int main(int argc, char const* argv[]) {
                                 std::cout << "Could not generate image for " << fileName << std::endl;
                         }
                 }
+                auto end = std::chrono::high_resolution_clock::now();
+                auto time = end-start;
+                auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(time);
+                std::cout << "Time taken to generate images: " << ms.count()/1000.0 << " seconds." <<std::endl;
         }
         catch(const std::bad_alloc &exception)
         {
@@ -87,7 +93,7 @@ int main(int argc, char const* argv[]) {
     		//Basically this return value tells our automated test scripts to run your engine on a pc with more memory.
     		//(Unless of course you are already consuming the maximum allowed amount of memory)
     		//If your engine does NOT adhere to this requirement you risk losing points because then our scripts will
-		//mark the test as failed while in reality it just needed a bit more memory
+		    //mark the test as failed while in reality it just needed a bit more memory
                 std::cerr << "Error: insufficient memory" << std::endl;
                 retVal = 100;
         }

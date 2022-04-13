@@ -21,6 +21,7 @@
 #include <vector>
 #include <iostream>
 #include "ZBuffer.h"
+#include "vector3d.h"
 /**
  * \brief The namespace of the EasyImage class
  */
@@ -237,6 +238,11 @@ namespace img
              */
              void draw_zbuf_line(ZBuffer &buffer, unsigned int x0, unsigned int y0, double z0,
                                  unsigned int x1, unsigned int y1, double z1, const Color &color);
+
+             /**
+              * \brief Draws a triangle using a Z-Buffer
+              */
+             void draw_zbuf_triag(ZBuffer &buffer, const Vector3D &a, const Vector3D &b, const Vector3D &c, double d, double dx, double dy, const Color &color);
 
 		private:
 			friend std::istream& operator>>(std::istream& in, EasyImage & image);

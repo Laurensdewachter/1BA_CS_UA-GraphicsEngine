@@ -15,6 +15,8 @@ Point2D doProjection(const Vector3D &point, double d);
 
 Lines2D doProjection(const Figures3D &figs);
 
+Lines2D doProjectionConst(const Figures3D figs);
+
 Figure eyeFigure(const ini::Configuration &configuration, std::string &figureName, Matrix &V);
 
 Figure createCube(const ini::Configuration &configuration, std::string &figureName, Matrix &V);
@@ -37,6 +39,10 @@ Figure createTorus(const ini::Configuration &configuration, std::string &figureN
 
 namespace Lines3D {
     img::EasyImage wireframe(const ini::Configuration &configuration);
+
+    img::EasyImage zBufferWireframe(const ini::Configuration &configuration);
+
+    img::EasyImage zBuffer(const ini::Configuration &configuration);
 }
 
 #endif

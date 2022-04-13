@@ -34,6 +34,33 @@ Lines2D doProjection(const Figures3D &figs) {
     return lines;
 }
 
+Lines2D doProjectionConst(const Figures3D figs) {
+    Lines2D lines;
+    for (auto i : figs) {
+        for (auto j : i.faces) {
+            for (unsigned int k = 0; k < j.point_indexes.size(); k++) {
+                Line2D line;
+                if (k == j.point_indexes.size()-1) {
+                    line.p1 = doProjection(i.points[j.point_indexes[k]], 1);
+                    line.p2 = doProjection(i.points[j.point_indexes[0]], 1);
+
+                    line.z1 = i.points[j.point_indexes[k]].z;
+                    line.z2 = i.points[j.point_indexes[0]].z;
+                } else {
+                    line.p1 = doProjection(i.points[j.point_indexes[k]], 1);
+                    line.p2 = doProjection(i.points[j.point_indexes[k+1]], 1);
+
+                    line.z1 = i.points[j.point_indexes[k]].z;
+                    line.z2 = i.points[j.point_indexes[k+1]].z;
+                }
+                line.color = i.color;
+                lines.push_back(line);
+            }
+        }
+    }
+    return lines;
+}
+
 Figure eyeFigure(const ini::Configuration &configuration, std::string &figureName,
                Matrix &V) {
     const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
@@ -388,7 +415,6 @@ Figure createTorus(const ini::Configuration &configuration, std::string &figureN
 }
 
 img::EasyImage Lines3D::wireframe(const ini::Configuration &configuration) {
-
     Figures3D figures;
 
     const unsigned int size = configuration["General"]["size"].as_int_or_die();
@@ -432,4 +458,119 @@ img::EasyImage Lines3D::wireframe(const ini::Configuration &configuration) {
     Lines2D lines = doProjection(figures);
 
     return coordToPixel(lines, size, backgroundColorElement);
+}
+
+img::EasyImage Lines3D::zBufferWireframe(const ini::Configuration &configuration) {
+    Figures3D figures;
+
+    const unsigned int size = configuration["General"]["size"].as_int_or_die();
+    std::vector<double> backgroundColor = configuration["General"]["backgroundcolor"].as_double_tuple_or_die();
+    img::Color backgroundColorElement(backgroundColor[0]*255, backgroundColor[1]*255, backgroundColor[2]*255);
+    const unsigned int nrFigures = configuration["General"]["nrFigures"].as_int_or_die();
+    std::vector<double> eye = configuration["General"]["eye"].as_double_tuple_or_die();
+
+    Matrix V = Transformation::eyePointTrans(Vector3D::point(eye[0], eye[1], eye[2]));
+
+    for (unsigned int i = 0; i < nrFigures; i++) {
+        std::string figureName = "Figure" + std::to_string(i);
+
+        std::string type = configuration[figureName]["type"].as_string_or_die();
+
+        if (type == "LineDrawing") {
+            figures.push_back(eyeFigure(configuration, figureName, V));
+        } else if (type == "Cube") {
+            figures.push_back(createCube(configuration, figureName, V));
+        } else if (type == "Tetrahedron") {
+            figures.push_back(createTetrahedron(configuration, figureName, V));
+        } else if (type == "Octahedron") {
+            figures.push_back(createOctahedron(configuration, figureName, V));
+        } else if (type == "Icosahedron") {
+            figures.push_back(createIcosahedron(configuration, figureName, V));
+        } else if (type == "Dodecahedron") {
+            figures.push_back(createDodecahedron(configuration, figureName, V));
+        } else if (type == "Sphere") {
+            figures.push_back(createSphere(configuration, figureName, V));
+        } else if (type == "Cone") {
+            figures.push_back(createCone(configuration, figureName, V));
+        } else if (type == "Cylinder") {
+            figures.push_back(createCylinder(configuration, figureName, V));
+        } else if (type == "Torus") {
+            figures.push_back(createTorus(configuration, figureName, V));
+        } else if (type == "3DLSystem") {
+            figures.push_back(LSystem3D::LSystem3D(configuration, figureName, V));
+        }
+    }
+
+    Lines2D lines = doProjection(figures);
+
+    return coordToPixel(lines, size, backgroundColorElement, true);
+}
+
+img::EasyImage Lines3D::zBuffer(const ini::Configuration &configuration) {
+    Figures3D figures;
+
+    const unsigned int size = configuration["General"]["size"].as_int_or_die();
+    std::vector<double> backgroundColor = configuration["General"]["backgroundcolor"].as_double_tuple_or_die();
+    img::Color backgroundColorElement(backgroundColor[0] * 255, backgroundColor[1] * 255, backgroundColor[2] * 255);
+    const unsigned int nrFigures = configuration["General"]["nrFigures"].as_int_or_die();
+    std::vector<double> eye = configuration["General"]["eye"].as_double_tuple_or_die();
+
+    Matrix V = Transformation::eyePointTrans(Vector3D::point(eye[0], eye[1], eye[2]));
+
+    for (unsigned int i = 0; i < nrFigures; i++) {
+        std::string figureName = "Figure" + std::to_string(i);
+
+        std::string type = configuration[figureName]["type"].as_string_or_die();
+
+        Figure currentFig;
+
+        if (type == "LineDrawing") {
+            currentFig = eyeFigure(configuration, figureName, V);
+        } else if (type == "Cube") {
+            currentFig = createCube(configuration, figureName, V);
+        } else if (type == "Tetrahedron") {
+            currentFig = createTetrahedron(configuration, figureName, V);
+        } else if (type == "Octahedron") {
+            currentFig = createOctahedron(configuration, figureName, V);
+        } else if (type == "Icosahedron") {
+            currentFig = createIcosahedron(configuration, figureName, V);
+        } else if (type == "Dodecahedron") {
+            currentFig = createDodecahedron(configuration, figureName, V);
+        } else if (type == "Sphere") {
+            currentFig = createSphere(configuration, figureName, V);
+        } else if (type == "Cone") {
+            currentFig = createCone(configuration, figureName, V);
+        } else if (type == "Cylinder") {
+            currentFig = createCylinder(configuration, figureName, V);
+        } else if (type == "Torus") {
+            currentFig = createTorus(configuration, figureName, V);
+        }
+
+        std::vector<Face> newFaces;
+        for (auto &f : currentFig.faces) {
+            if (f.point_indexes.size() > 3) {
+                std::vector<Face> tempNewFaces;
+                tempNewFaces = Utils::triangulate(f);
+                for (auto &f2 : tempNewFaces) newFaces.push_back(f2);
+            } else newFaces.push_back(f);
+        }
+        currentFig.faces = newFaces;
+        figures.push_back(currentFig);
+    }
+
+    Lines2D projection = doProjectionConst(figures);
+    double width, height, d, dx, dy;
+    Utils::calculateValues(projection, size, width, height, d, dx, dy);
+
+    img::EasyImage image(lround(width), lround(height), backgroundColorElement);
+    ZBuffer buffer(image.get_width(), image.get_height());
+
+    for (auto &curFig : figures) {
+        for (auto &curFace : curFig.faces) {
+            image.draw_zbuf_triag(buffer, curFig.points[curFace.point_indexes[0]], curFig.points[curFace.point_indexes[1]],
+                                  curFig.points[curFace.point_indexes[2]], d, dx, dy, curFig.color);
+        }
+    }
+
+    return image;
 }

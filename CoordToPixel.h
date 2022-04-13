@@ -23,6 +23,6 @@ struct Line2D {
 
 using Lines2D = std::list<Line2D>;
 
-img::EasyImage coordToPixel(Lines2D &lines, double size, img::Color backgroundColor);
+img::EasyImage coordToPixel(Lines2D &lines, double size, img::Color backgroundColor, bool zBuffer = false);
 
 #endif

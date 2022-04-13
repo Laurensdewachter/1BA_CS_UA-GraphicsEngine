@@ -43,3 +43,46 @@ void Utils::splitTriangles(Figure &figure) {
     }
     figure = newFig;
 }
+
+std::vector<Face> Utils::triangulate(const Face &face) {
+    std::vector<Face> newFaces;
+
+    for (unsigned int i = 1; i < face.point_indexes.size()-1; i++) {
+        Face newFace({face.point_indexes[0], face.point_indexes[i], face.point_indexes[i+1]});
+        newFaces.push_back(newFace);
+    }
+
+    return newFaces;
+}
+
+void Utils::calculateValues(Lines2D &lines, double size, double &width, double &height, double &d, double &dx, double &dy) {
+    std::list<Point2D> points;
+    for (auto &i: lines) {
+        points.push_back(i.p1);
+        points.push_back(i.p2);
+    }
+    std::list<double> xPoints;
+    std::list<double> yPoints;
+    for (auto &i: points) {
+        xPoints.push_back(i.x);
+        yPoints.push_back(i.y);
+    }
+
+    double xMax = *std::max_element(xPoints.begin(), xPoints.end());
+    double xMin = *std::min_element(xPoints.begin(), xPoints.end());
+    double yMax = *std::max_element(yPoints.begin(), yPoints.end());
+    double yMin = *std::min_element(yPoints.begin(), yPoints.end());
+
+    double xRange = xMax - xMin;
+    double yRange = yMax - yMin;
+
+    width = size * (xRange / std::max(xRange, yRange));
+    height = size * (yRange / std::max(xRange, yRange));
+
+    d = 0.95 * (width / xRange);
+
+    double DCx = d * ((xMax + xMin)/2.0);
+    double DCy = d * ((yMax + yMin)/2.0);
+    dx = (width/2.0) - DCx;
+    dy = (height/2.0) - DCy;
+}

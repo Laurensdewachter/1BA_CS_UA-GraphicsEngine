@@ -364,6 +364,86 @@ void img::EasyImage::draw_zbuf_line(ZBuffer &buffer, unsigned int x0, unsigned i
         }
     }
 }
+void img::EasyImage::draw_zbuf_triag(ZBuffer &buffer, const Vector3D &a, const Vector3D &b, const Vector3D &c, double d,
+                                     double dx, double dy, const Color &color) {
+    double xa = ((d*a.x)/(-a.z))+dx;
+    double ya = ((d*a.y)/(-a.z))+dy;
+    double xb = ((d*b.x)/(-b.z))+dx;
+    double yb = ((d*b.y)/(-b.z))+dy;
+    double xc = ((d*c.x)/(-c.z))+dx;
+    double yc = ((d*c.y)/(-c.z))+dy;
+
+    double yMinTemp = std::min(ya, yb);
+    double yMaxTemp = std::max(ya, yb);
+
+    int yMin = lround(std::min(yMinTemp, yc) + 0.5);
+    int yMax = lround(std::max(yMaxTemp, yc) - 0.5);
+
+    for (int yi = yMin; yi <= yMax; yi++) {
+        double xlAB = std::numeric_limits<double>::infinity();
+        double xlAC = std::numeric_limits<double>::infinity();
+        double xlBC = std::numeric_limits<double>::infinity();
+        double xrAB = -std::numeric_limits<double>::infinity();
+        double xrAC = -std::numeric_limits<double>::infinity();
+        double xrBC = -std::numeric_limits<double>::infinity();
+
+        double xp = xa;
+        double yp = ya;
+        double xq = xb;
+        double yq = yb;
+        if ((yi-yp)*(yi-yq) <= 0 && yp != yq) {
+            double xi = xq + (xp - xq) * (yi - yq) / (yp - yq);
+            xlAB = xi;
+            xrAB = xi;
+        }
+
+        xq = xc;
+        yq = yc;
+        if ((yi-yp)*(yi-yq) <= 0 && yp != yq) {
+            double xi = xq + (xp - xq) * (yi - yq) / (yp - yq);
+            xlAC = xi;
+            xrAC = xi;
+        }
+
+        xp = xb;
+        yp = yb;
+        xq = xc;
+        yq = yc;
+        if ((yi-yp)*(yi-yq) <= 0 && yp != yq) {
+            double xi = xq + (xp - xq) * (yi - yq) / (yp - yq);
+            xlBC = xi;
+            xrBC = xi;
+        }
+
+        double left = std::min(xlAB, xlAC);
+        double right = std::max(xrAB, xrAC);
+        int xl = lround(std::min(left, xlBC)+0.5);
+        int xr = lround(std::max(right, xrBC)-0.5);
+
+        double xg = (xa+xb+xc)/3;
+        double yg = (ya+yb+yc)/3;
+        double one_over_zg = 1/(3*a.z) + 1/(3*b.z) + 1/(3*c.z);
+
+        Vector3D u = Vector3D::vector(b.x-a.x, b.y-a.y, b.z-a.z);
+        Vector3D v = Vector3D::vector(c.x-a.x, c.y-a.y, c.z-a.z);
+        double w1 = u.y*v.z - u.z*v.y;
+        double w2 = u.z*v.x - u.x*v.z;
+        double w3 = u.x*v.y - u.y*v.x;
+        double k = w1*a.x + w2*a.y + w3*a.z;
+        double dzdx = w1/(-d*k);
+        double dzdy = w2/(-d*k);
+
+        for (int i = xl; i <= xr; i++) {
+            double cur_z_value = buffer[i][yi];
+            double new_z_value = 1.0001*one_over_zg + (i-xg)*(dzdx) + (yi-yg)*(dzdy);
+
+            if (new_z_value < cur_z_value) {
+                (*this)(i, yi) = color;
+                buffer[i][yi] = new_z_value;
+            }
+        }
+    }
+}
 std::ostream& img::operator<<(std::ostream& out, EasyImage const& image)
 {
 
