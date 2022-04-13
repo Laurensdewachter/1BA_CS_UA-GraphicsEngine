@@ -14,18 +14,18 @@ set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${OWN_GXX_FLAGS}")
 ############################################################
 # List all sources
 ############################################################
-set(engine_sources utils/easy_image.cc engine.cc
-		utils/ini_configuration.cc
-		utils/l_parser.cc
-        LSystems/2DLSystem.h
-        utils/vector3d.cc
-		3DLines.cpp
-		CoordToPixel.cpp
-		Intro.cpp LSystems/2DLSystem.cpp
-		utils/PlatonicBodies.cpp
-		utils/PlatonicBodies.h
-		utils/Figure.h
-		utils/Transformation.cpp utils/Transformation.h utils/Utils.cpp utils/Utils.h LSystems/3DLSystem.h LSystems/3DLSystem.cpp utils/ZBuffer.h)
+set(engine_sources build/utils/easy_image.cc engine.cc
+        build/utils/ini_configuration.cc
+        build/utils/l_parser.cc
+        build/LSystems/2DLSystem.h
+        build/utils/vector3d.cc
+        build/3DLines.cpp
+        build/CoordToPixel.cpp
+        build/Intro.cpp build/LSystems/2DLSystem.cpp
+        build/utils/PlatonicBodies.cpp
+        build/utils/PlatonicBodies.h
+        build/utils/Figure.h
+        build/utils/Transformation.cpp build/utils/Transformation.h build/utils/Utils.cpp build/utils/Utils.h build/LSystems/3DLSystem.h build/LSystems/3DLSystem.cpp build/utils/ZBuffer.h)
 
 ############################################################
 # Create an executable

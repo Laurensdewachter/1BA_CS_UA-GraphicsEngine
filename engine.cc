@@ -1,9 +1,9 @@
 #include "utils/easy_image.h"
 #include "utils/ini_configuration.h"
-#include "CoordToPixel.h"
-#include "Intro.h"
+#include "build/CoordToPixel.h"
+#include "build/Intro.h"
 #include "LSystems/2DLSystem.h"
-#include "3DLines.h"
+#include "build/3DLines.h"
 
 #include <iostream>
 #include <stdexcept>
