@@ -1,12 +1,10 @@
-#include "utils/easy_image.h"
-#include "utils/ini_configuration.h"
-#include "build/CoordToPixel.h"
+#include "build/utils/easy_image.h"
+#include "build/utils/ini_configuration.h"
 #include "build/Intro.h"
-#include "LSystems/2DLSystem.h"
+#include "build/LSystems/2DLSystem.h"
 #include "build/3DLines.h"
 
 #include <iostream>
-#include <stdexcept>
 #include <string>
 #include <chrono>
 
@@ -39,48 +37,39 @@ int main(int argc, char const* argv[]) {
                 auto start = std::chrono::high_resolution_clock::now();
                 for(std::string fileName : args)
                 {
-                        ini::Configuration conf;
-                        try
-                        {
-                                std::ifstream fin(fileName);
-                                fin >> conf;
-                                fin.close();
+                    ini::Configuration conf;
+                    try {
+                        std::ifstream fin(fileName);
+                        fin >> conf;
+                        fin.close();
+                    }
+                    catch (ini::ParseException &ex) {
+                        std::cerr << "Error parsing file: " << fileName << ": " << ex.what() << std::endl;
+                        retVal = 1;
+                        continue;
+                    }
+                    img::EasyImage image = generate_image(conf);
+                    if (image.get_height() > 0 && image.get_width() > 0) {
+                        std::string::size_type pos = fileName.rfind('.');
+                        if (pos == std::string::npos) {
+                            //filename does not contain a '.' --> append a '.bmp' suffix
+                            fileName += ".bmp";
+                        } else {
+                            fileName = fileName.substr(0, pos) + ".bmp";
                         }
-                        catch(ini::ParseException& ex)
-                        {
-                                std::cerr << "Error parsing file: " << fileName << ": " << ex.what() << std::endl;
-                                retVal = 1;
-                                continue;
-                        }
-                        img::EasyImage image = generate_image(conf);
-                        if(image.get_height() > 0 && image.get_width() > 0)
-                        {
-                                std::string::size_type pos = fileName.rfind('.');
-                                if(pos == std::string::npos)
-                                {
-                                        //filename does not contain a '.' --> append a '.bmp' suffix
-                                        fileName += ".bmp";
-                                }
-                                else
-                                {
-                                        fileName = fileName.substr(0,pos) + ".bmp";
-                                }
-                                try
-                                {
-                                        std::ofstream f_out(fileName.c_str(),std::ios::trunc | std::ios::out | std::ios::binary);
-                                        f_out << image;
+                        try {
+                            std::ofstream f_out(fileName.c_str(),
+                                                std::ios::trunc | std::ios::out | std::ios::binary);
+                            f_out << image;
 
-                                }
-                                catch(std::exception& ex)
-                                {
-                                        std::cerr << "Failed to write image to file: " << ex.what() << std::endl;
-                                        retVal = 1;
-                                }
                         }
-                        else
-                        {
-                                std::cout << "Could not generate image for " << fileName << std::endl;
+                        catch (std::exception &ex) {
+                            std::cerr << "Failed to write image to file: " << ex.what() << std::endl;
+                            retVal = 1;
                         }
+                    } else {
+                        std::cout << "Could not generate image for " << fileName << std::endl;
+                    }
                 }
                 auto end = std::chrono::high_resolution_clock::now();
                 auto time = end-start;
