@@ -264,7 +264,7 @@ void img::EasyImage::draw_zbuf_line(ZBuffer &buffer, unsigned int x0, unsigned i
 
     if (x0 == x1 && y0 == y1) {
         double cur_z_value = buffer[x0][y0];
-        double new_z_value = (1/z0) + (1/z1);
+        double new_z_value = ((1/z0) + (1/z1))/2;
 
         if (new_z_value < cur_z_value) {
             (*this)(x0, y0) = color;
@@ -273,8 +273,13 @@ void img::EasyImage::draw_zbuf_line(ZBuffer &buffer, unsigned int x0, unsigned i
     }
     else if (x0 == x1)
     {
+        if (y0 > y1) {
+            std::swap(x0, x1);
+            std::swap(y0, y1);
+            std::swap(z0, z1);
+        }
         //special case for x0 == x1
-        unsigned int a = std::max(y0, y1) - std::min(y0, y1);
+        double a = std::max(y0, y1) - std::min(y0, y1);
         unsigned int k = 0;
         for (unsigned int i = std::min(y0, y1); i <= std::max(y0, y1); i++)
         {
@@ -290,8 +295,13 @@ void img::EasyImage::draw_zbuf_line(ZBuffer &buffer, unsigned int x0, unsigned i
     }
     else if (y0 == y1)
     {
+        if (x0 > x1) {
+            std::swap(x0, x1);
+            std::swap(y0, y1);
+            std::swap(z0, z1);
+        }
         //special case for y0 == y1
-        unsigned int a = std::max(x0, x1) - std::min(x0, x1);
+        double a = std::max(x0, x1) - std::min(x0, x1);
         unsigned int k = 0;
         for (unsigned int i = std::min(x0, x1); i <= std::max(x0, x1); i++)
         {
@@ -312,11 +322,12 @@ void img::EasyImage::draw_zbuf_line(ZBuffer &buffer, unsigned int x0, unsigned i
             //flip points if x1>x0: we want x0 to have the lowest value
             std::swap(x0, x1);
             std::swap(y0, y1);
+            std::swap(z0, z1);
         }
         double m = ((double) y1 - (double) y0) / ((double) x1 - (double) x0);
         if (-1.0 <= m && m <= 1.0)
         {
-            unsigned int a = x1-x0;
+            double a = x1-x0;
             unsigned int k = 0;
             for (unsigned int i = 0; i <= (x1 - x0); i++)
             {
@@ -332,7 +343,7 @@ void img::EasyImage::draw_zbuf_line(ZBuffer &buffer, unsigned int x0, unsigned i
         }
         else if (m > 1.0)
         {
-            unsigned int a = y1-y0;
+            double a = y1-y0;
             unsigned int k = 0;
             for (unsigned int i = 0; i <= (y1 - y0); i++)
             {
@@ -348,7 +359,7 @@ void img::EasyImage::draw_zbuf_line(ZBuffer &buffer, unsigned int x0, unsigned i
         }
         else if (m < -1.0)
         {
-            unsigned int a = y0-y1;
+            double a = y0-y1;
             unsigned int k = 0;
             for (unsigned int i = 0; i <= (y0 - y1); i++)
             {
