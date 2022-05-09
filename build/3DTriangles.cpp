@@ -41,56 +41,60 @@ img::EasyImage Triangles3D::zBuffer(const ini::Configuration &configuration) {
 
         std::string type = configuration[figureName]["type"].as_string_or_die();
 
-        Figure currentFig;
+        Figures3D currentFigs;
 
-        if (type == "Cube") figures.push_back(createCube(configuration, figureName, V));
-        else if (type == "Tetrahedron") figures.push_back(createTetrahedron(configuration, figureName, V));
-        else if (type == "Octahedron") figures.push_back(createOctahedron(configuration, figureName, V));
-        else if (type == "Icosahedron") figures.push_back(createIcosahedron(configuration, figureName, V));
-        else if (type == "Dodecahedron") figures.push_back(createDodecahedron(configuration, figureName, V));
-        else if (type == "Sphere") figures.push_back(createSphere(configuration, figureName, V));
-        else if (type == "Cone") figures.push_back(createCone(configuration, figureName, V));
-        else if (type == "Cylinder") figures.push_back(createCylinder(configuration, figureName, V));
-        else if (type == "Torus") figures.push_back(createTorus(configuration, figureName, V));
+        if (type == "Cube") currentFigs.push_back(createCube(configuration, figureName, V));
+        else if (type == "Tetrahedron") currentFigs.push_back(createTetrahedron(configuration, figureName, V));
+        else if (type == "Octahedron") currentFigs.push_back(createOctahedron(configuration, figureName, V));
+        else if (type == "Icosahedron") currentFigs.push_back(createIcosahedron(configuration, figureName, V));
+        else if (type == "Dodecahedron") currentFigs.push_back(createDodecahedron(configuration, figureName, V));
+        else if (type == "Sphere") currentFigs.push_back(createSphere(configuration, figureName, V));
+        else if (type == "Cone") currentFigs.push_back(createCone(configuration, figureName, V));
+        else if (type == "Cylinder") currentFigs.push_back(createCylinder(configuration, figureName, V));
+        else if (type == "Torus") currentFigs.push_back(createTorus(configuration, figureName, V));
         else if (type == "FractalCube") {
             Figures3D fractalFigs = createFractalCube(configuration, figureName, V);
-            for (auto &curFig : fractalFigs) figures.push_back(curFig);
+            for (auto &curFig : fractalFigs) currentFigs.push_back(curFig);
         }
         else if (type == "FractalTetrahedron") {
             Figures3D fractalFigs = createFractalTetrahedron(configuration, figureName, V);
-            for (auto &curFig : fractalFigs) figures.push_back(curFig);
+            for (auto &curFig : fractalFigs) currentFigs.push_back(curFig);
         }
         else if (type == "FractalOctahedron") {
             Figures3D fractalFigs = createFractalOctahedron(configuration, figureName, V);
-            for (auto &curFig : fractalFigs) figures.push_back(curFig);
+            for (auto &curFig : fractalFigs) currentFigs.push_back(curFig);
         }
         else if (type == "FractalIcosahedron") {
             Figures3D fractalFigs = createFractalIcosahedron(configuration, figureName, V);
-            for (auto &curFig : fractalFigs) figures.push_back(curFig);
+            for (auto &curFig : fractalFigs) currentFigs.push_back(curFig);
         }
         else if (type == "FractalDodecahedron") {
             Figures3D fractalFigs = createFractalDodecahedron(configuration, figureName, V);
-            for (auto &curFig : fractalFigs) figures.push_back(curFig);
+            for (auto &curFig : fractalFigs) currentFigs.push_back(curFig);
         }
-        else if (type == "BuckyBall") figures.push_back(createBuckyBall(configuration, figureName, V));
+        else if (type == "BuckyBall") currentFigs.push_back(createBuckyBall(configuration, figureName, V));
         else if (type == "FractalBuckyBall") {
             Figures3D fractalFigs = createFractalBuckyBall(configuration, figureName, V);
-            for (auto &curFig : fractalFigs) figures.push_back(curFig);
+            for (auto &curFig : fractalFigs) currentFigs.push_back(curFig);
+        }
+        else if (type == "MengerSponge") {
+            Figures3D fractalFigs = createMengerSponge(configuration, figureName, V);
+            for (auto &curFig : fractalFigs) currentFigs.push_back(curFig);
         }
 
-        std::vector<Face> newFaces;
-        for (auto &f : currentFig.faces) {
-            if (f.point_indexes.size() > 3) {
-                std::vector<Face> tempNewFaces;
-                tempNewFaces = Utils::triangulate(f);
-                for (auto &f2 : tempNewFaces) newFaces.push_back(f2);
-            } else newFaces.push_back(f);
+        for (auto &currentFig : currentFigs) {
+            std::vector<Face> newFaces;
+            for (auto &f: currentFig.faces) {
+                if (f.point_indexes.size() > 3) {
+                    std::vector<Face> tempNewFaces;
+                    tempNewFaces = Utils::triangulate(f);
+                    for (auto &f2: tempNewFaces) newFaces.push_back(f2);
+                } else newFaces.push_back(f);
+            }
+            currentFig.faces = newFaces;
+
+            figures.push_back(currentFig);
         }
-        currentFig.faces = newFaces;
-
-
-
-        figures.push_back(currentFig);
     }
 
     Lines2D projection = doProjectionConst(figures);

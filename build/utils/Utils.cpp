@@ -115,6 +115,46 @@ Figures3D Utils::generateFractal(Figure &fig, const unsigned int nrIterations, c
     return result;
 }
 
+Figures3D Utils::generateMengerSponge(Figure &fig, unsigned int nrIterations) {
+    std::vector<Figure> toConvert = {fig};
+    std::vector<Figure> newFigs;
+
+    for (unsigned int it = 0; it < nrIterations; it++) {
+        newFigs.clear();
+        for (auto & curFig : toConvert) {
+            curFig.points.push_back(Vector3D::point(0, -1, 1));
+            curFig.points.push_back(Vector3D::point(0, -1, -1));
+            curFig.points.push_back(Vector3D::point(0, 1, 1));
+            curFig.points.push_back(Vector3D::point(0, 1, -1));
+            curFig.points.push_back(Vector3D::point(-1, 0, 1));
+            curFig.points.push_back(Vector3D::point(-1, 0, -1));
+            curFig.points.push_back(Vector3D::point(1, 0, 1));
+            curFig.points.push_back(Vector3D::point(1, 0, -1));
+            curFig.points.push_back(Vector3D::point(-1, -1, 0));
+            curFig.points.push_back(Vector3D::point(1, -1, 0));
+            curFig.points.push_back(Vector3D::point(-1, 1, 0));
+            curFig.points.push_back(Vector3D::point(1, 1, 0));
+            for (unsigned int pointIndex = 0; pointIndex < curFig.points.size(); pointIndex++) {
+                Vector3D curPoint = curFig.points[pointIndex];
+
+                Figure newFig = curFig;
+                Matrix S = Transformation::scaleFigure(1.0/3.0);
+                Transformation::applyTransformation(newFig, S);
+
+                Matrix T = Transformation::translate(curPoint - newFig.points[pointIndex]);
+                Transformation::applyTransformation(newFig, T);
+
+                newFigs.push_back(newFig);
+            }
+        }
+        toConvert = newFigs;
+    }
+
+    Figures3D result;
+    for (auto &curFig : newFigs) result.push_back(curFig);
+    return result;
+}
+
 void Utils::clip(Figure &fig, const double hfov, const double aspectRatio, const double dNear, const double hFar) {
 
 }

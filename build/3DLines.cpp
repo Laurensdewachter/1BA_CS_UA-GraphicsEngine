@@ -138,10 +138,8 @@ Figures3D createFractalCube(const ini::Configuration &configuration, std::string
     const double scale = configuration[figureName]["scale"].as_double_or_die();
     std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
     std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
-    unsigned int nrIterations;
-    double fractalScale;
-    nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
-    fractalScale = configuration[figureName]["fractalScale"].as_double_or_die();
+    const unsigned int nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
+    const double fractalScale = configuration[figureName]["fractalScale"].as_double_or_die();
 
     Matrix S = Transformation::scaleFigure(scale);
     Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
@@ -199,10 +197,8 @@ Figures3D createFractalTetrahedron(const ini::Configuration &configuration, std:
     const double scale = configuration[figureName]["scale"].as_double_or_die();
     std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
     std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
-    unsigned int nrIterations;
-    double fractalScale;
-    nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
-    fractalScale = configuration[figureName]["fractalScale"].as_double_or_die();
+    const unsigned int nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
+    const double fractalScale = configuration[figureName]["fractalScale"].as_double_or_die();
 
     Matrix S = Transformation::scaleFigure(scale);
     Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
@@ -260,10 +256,8 @@ Figures3D createFractalOctahedron(const ini::Configuration &configuration, std::
     const double scale = configuration[figureName]["scale"].as_double_or_die();
     std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
     std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
-    unsigned int nrIterations;
-    double fractalScale;
-    nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
-    fractalScale = configuration[figureName]["fractalScale"].as_double_or_die();
+    const unsigned int nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
+    const double fractalScale = configuration[figureName]["fractalScale"].as_double_or_die();
 
     Matrix S = Transformation::scaleFigure(scale);
     Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
@@ -321,10 +315,8 @@ Figures3D createFractalIcosahedron(const ini::Configuration &configuration, std:
     const double scale = configuration[figureName]["scale"].as_double_or_die();
     std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
     std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
-    unsigned int nrIterations;
-    double fractalScale;
-    nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
-    fractalScale = configuration[figureName]["fractalScale"].as_double_or_die();
+    const unsigned int nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
+    const double fractalScale = configuration[figureName]["fractalScale"].as_double_or_die();
 
     Matrix S = Transformation::scaleFigure(scale);
     Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
@@ -382,10 +374,8 @@ Figures3D createFractalDodecahedron(const ini::Configuration &configuration, std
     const double scale = configuration[figureName]["scale"].as_double_or_die();
     std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
     std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
-    unsigned int nrIterations;
-    double fractalScale;
-    nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
-    fractalScale = configuration[figureName]["fractalScale"].as_double_or_die();
+    const unsigned int nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
+    const double fractalScale = configuration[figureName]["fractalScale"].as_double_or_die();
 
     Matrix S = Transformation::scaleFigure(scale);
     Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
@@ -617,10 +607,8 @@ Figures3D createFractalBuckyBall(const ini::Configuration &configuration, std::s
     const double scale = configuration[figureName]["scale"].as_double_or_die();
     std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
     std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
-    unsigned int nrIterations;
-    double fractalScale;
-    nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
-    fractalScale = configuration[figureName]["fractalScale"].as_double_or_die();
+    const unsigned int nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
+    const double fractalScale = configuration[figureName]["fractalScale"].as_double_or_die();
 
     Matrix S = Transformation::scaleFigure(scale);
     Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
@@ -634,6 +622,38 @@ Figures3D createFractalBuckyBall(const ini::Configuration &configuration, std::s
 
     Figures3D fractalFigs;
     if (nrIterations > 0) fractalFigs = Utils::generateFractal(fig, nrIterations, fractalScale);
+    else fractalFigs.push_back(fig);
+
+    img::Color colorElement(color[0]*255, color[1]*255, color[2]*255);
+    for (auto &curFig : fractalFigs) {
+        curFig.color = colorElement;
+        Transformation::applyTransformation(curFig, F);
+    }
+
+    return fractalFigs;
+}
+
+Figures3D createMengerSponge(const ini::Configuration &configuration, std::string &figureName, Matrix &V) {
+    const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
+    const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
+    const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
+    const double scale = configuration[figureName]["scale"].as_double_or_die();
+    std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
+    std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
+    unsigned int nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
+
+    Matrix S = Transformation::scaleFigure(scale);
+    Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
+    Matrix rY = Transformation::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = Transformation::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = Transformation::translate(Vector3D::point(center[0], center[1], center[2]));
+
+    Matrix F = S * rX * rY * rZ * T * V;
+
+    Figure fig = PlatonicBodies::getCubeFigure();
+
+    Figures3D fractalFigs;
+    if (nrIterations > 0) fractalFigs = Utils::generateMengerSponge(fig, nrIterations);
     else fractalFigs.push_back(fig);
 
     img::Color colorElement(color[0]*255, color[1]*255, color[2]*255);
@@ -697,6 +717,10 @@ img::EasyImage Lines3D::wireframe(const ini::Configuration &configuration) {
             Figures3D fractalFigs = createFractalBuckyBall(configuration, figureName, V);
             for (auto &curFig : fractalFigs) figures.push_back(curFig);
         }
+        else if (type == "MengerSponge") {
+            Figures3D fractalFigs = createMengerSponge(configuration, figureName, V);
+            for (auto &curFig : fractalFigs) figures.push_back(curFig);
+        }
     }
 
     Lines2D lines = doProjection(figures);
@@ -754,6 +778,10 @@ img::EasyImage Lines3D::zBufferWireframe(const ini::Configuration &configuration
         else if (type == "BuckyBall") figures.push_back(createBuckyBall(configuration, figureName, V));
         else if (type == "FractalBuckyBall") {
             Figures3D fractalFigs = createFractalBuckyBall(configuration, figureName, V);
+            for (auto &curFig : fractalFigs) figures.push_back(curFig);
+        }
+        else if (type == "MengerSponge") {
+            Figures3D fractalFigs = createMengerSponge(configuration, figureName, V);
             for (auto &curFig : fractalFigs) figures.push_back(curFig);
         }
     }

@@ -45,6 +45,8 @@ Figure createTorus(const ini::Configuration &configuration, std::string &figureN
 Figure createBuckyBall(const ini::Configuration &configuration, std::string &figureName, Matrix &V);
 Figures3D createFractalBuckyBall(const ini::Configuration &configuration, std::string &figureName, Matrix &V);
 
+Figures3D createMengerSponge(const ini::Configuration &configuration, std::string &figureName, Matrix &V);
+
 namespace Lines3D {
     img::EasyImage wireframe(const ini::Configuration &configuration);
 

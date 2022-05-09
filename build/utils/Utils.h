@@ -16,6 +16,8 @@ namespace Utils {
 
     Figures3D generateFractal(Figure &fig, unsigned int nrIterations, double scale);
 
+    Figures3D generateMengerSponge(Figure &fig, unsigned int nrIterations);
+
     void clip(Figure &fig, const double hfov, const double aspectRatio, const double dNear, const double hFar);
 };
 
