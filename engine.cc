@@ -3,6 +3,7 @@
 #include "build/Intro.h"
 #include "build/LSystems/2DLSystem.h"
 #include "build/3DLines.h"
+#include "build/3DTriangles.h"
 
 #include <iostream>
 #include <string>
@@ -17,7 +18,7 @@ img::EasyImage generate_image(const ini::Configuration &configuration) {
     else if (type == "2DLSystem") return LSystem2D::LSystem2D(configuration);
     else if (type == "Wireframe") return Lines3D::wireframe(configuration);
     else if (type == "ZBufferedWireframe") return Lines3D::zBufferWireframe(configuration);
-    else return Lines3D::zBuffer(configuration);
+    else return Triangles3D::zBuffer(configuration);
 }
 
 

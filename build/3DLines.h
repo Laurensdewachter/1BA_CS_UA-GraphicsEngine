@@ -20,14 +20,19 @@ Lines2D doProjectionConst(const Figures3D figs);
 Figure eyeFigure(const ini::Configuration &configuration, std::string &figureName, Matrix &V);
 
 Figure createCube(const ini::Configuration &configuration, std::string &figureName, Matrix &V);
+Figures3D createFractalCube(const ini::Configuration &configuration, std::string &figureName, Matrix &V);
 
 Figure createTetrahedron(const ini::Configuration &configuration, std::string &figureName, Matrix &V);
+Figures3D createFractalTetrahedron(const ini::Configuration &configuration, std::string &figureName, Matrix &V);
 
 Figure createOctahedron(const ini::Configuration &configuration, std::string &figureName, Matrix &V);
+Figures3D createFractalOctahedron(const ini::Configuration &configuration, std::string &figureName, Matrix &V);
 
 Figure createIcosahedron(const ini::Configuration &configuration, std::string &figureName, Matrix &V);
+Figures3D createFractalIcosahedron(const ini::Configuration &configuration, std::string &figureName, Matrix &V);
 
 Figure createDodecahedron(const ini::Configuration &configuration, std::string &figureName, Matrix &V);
+Figures3D createFractalDodecahedron(const ini::Configuration &configuration, std::string &figureName, Matrix &V);
 
 Figure createSphere(const ini::Configuration &configuration, std::string &figureName, Matrix &V);
 
@@ -37,12 +42,13 @@ Figure createCylinder(const ini::Configuration &configuration, std::string &figu
 
 Figure createTorus(const ini::Configuration &configuration, std::string &figureName, Matrix &V);
 
+Figure createBuckyBall(const ini::Configuration &configuration, std::string &figureName, Matrix &V);
+Figures3D createFractalBuckyBall(const ini::Configuration &configuration, std::string &figureName, Matrix &V);
+
 namespace Lines3D {
     img::EasyImage wireframe(const ini::Configuration &configuration);
 
     img::EasyImage zBufferWireframe(const ini::Configuration &configuration);
-
-    img::EasyImage zBuffer(const ini::Configuration &configuration);
 }
 
 #endif

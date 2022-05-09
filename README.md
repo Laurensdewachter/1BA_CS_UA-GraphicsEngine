@@ -23,8 +23,8 @@ X: Niet werkend of niet geïmplementeerd
 | 4   | Z-buffering (lijnen)     | V      |
 | 5   | Triangulatie             | V      |
 |     | Z-buffering (driehoeken) | V      |
-| 6   | 3D fractalen             |        |
-|     | BuckyBall                |        |
+| 6   | 3D fractalen             | V      |
+|     | BuckyBall                | V      |
 |     | Mengerspons              |        |
 |     | View Frustum             |        |
 | 7   | Ambient licht            |        |
@@ -40,7 +40,8 @@ X: Niet werkend of niet geïmplementeerd
 Geïmplementeerde vorm van texture mapping: ...
 
 ## Gekende problemen 
-...
+3D Fractalen: Werkt enkel met slechts 1 iteratie.
+
 ## Niet-gequoteerde functionaliteit
 ...
 

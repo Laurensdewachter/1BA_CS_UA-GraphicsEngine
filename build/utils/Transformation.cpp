@@ -74,3 +74,18 @@ void Transformation::applyTransformation(Figure &fig, const Matrix &M) {
         j *= M;
     }
 }
+
+Matrix Transformation::clippingTrans(const double theta, const double phi, const double r) {
+    Matrix M;
+    M(1, 1) = -std::sin(theta);
+    M(1, 2) = -std::cos(theta) * std::cos(phi);
+    M(1, 3) = std::cos(theta) * std::sin(phi);
+    M(2, 1) = std::cos(theta);
+    M(2, 2) = -std::sin(theta) * std::cos(phi);
+    M(2, 3) = std::sin(theta) * std::sin(phi);
+    M(3, 2) = std::sin(phi);
+    M(3, 3) = std::cos(phi);
+    M(4, 3) = -r;
+
+    return M;
+}

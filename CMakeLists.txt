@@ -26,7 +26,7 @@ set(engine_sources build/utils/easy_image.cc engine.cc
         build/utils/PlatonicBodies.h
         build/utils/Figure.h
         build/utils/Transformation.cpp build/utils/Transformation.h build/utils/Utils.cpp build/utils/Utils.h
-        build/LSystems/3DLSystem.h build/LSystems/3DLSystem.cpp build/utils/ZBuffer.h build/3DTriangles.cpp build/3DTriangles.h)
+        build/LSystems/3DLSystem.h build/LSystems/3DLSystem.cpp build/utils/ZBuffer.h build/3DTriangles.cpp build/3DTriangles.h build/utils/Clipping.cpp build/utils/Clipping.h)
 
 ############################################################
 # Create an executable

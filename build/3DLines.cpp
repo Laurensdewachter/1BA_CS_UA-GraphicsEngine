@@ -9,24 +9,24 @@ Point2D doProjection(const Vector3D &point, double d) {
 
 Lines2D doProjection(const Figures3D &figs) {
     Lines2D lines;
-    for (auto i : figs) {
-        for (auto j : i.faces) {
-            for (unsigned int k = 0; k < j.point_indexes.size(); k++) {
+    for (auto curFigure : figs) {
+        for (auto curFace : curFigure.faces) {
+            for (unsigned int k = 0; k < curFace.point_indexes.size(); k++) {
                 Line2D line;
-                if (k == j.point_indexes.size()-1) {
-                    line.p1 = doProjection(i.points[j.point_indexes[k]], 1);
-                    line.p2 = doProjection(i.points[j.point_indexes[0]], 1);
+                if (k == curFace.point_indexes.size() - 1) {
+                    line.p1 = doProjection(curFigure.points[curFace.point_indexes[k]], 1);
+                    line.p2 = doProjection(curFigure.points[curFace.point_indexes[0]], 1);
 
-                    line.z1 = i.points[j.point_indexes[k]].z;
-                    line.z2 = i.points[j.point_indexes[0]].z;
+                    line.z1 = curFigure.points[curFace.point_indexes[k]].z;
+                    line.z2 = curFigure.points[curFace.point_indexes[0]].z;
                 } else {
-                    line.p1 = doProjection(i.points[j.point_indexes[k]], 1);
-                    line.p2 = doProjection(i.points[j.point_indexes[k+1]], 1);
+                    line.p1 = doProjection(curFigure.points[curFace.point_indexes[k]], 1);
+                    line.p2 = doProjection(curFigure.points[curFace.point_indexes[k + 1]], 1);
 
-                    line.z1 = i.points[j.point_indexes[k]].z;
-                    line.z2 = i.points[j.point_indexes[k+1]].z;
+                    line.z1 = curFigure.points[curFace.point_indexes[k]].z;
+                    line.z2 = curFigure.points[curFace.point_indexes[k + 1]].z;
                 }
-                line.color = i.color;
+                line.color = curFigure.color;
                 lines.push_back(line);
             }
         }
@@ -105,8 +105,7 @@ Figure eyeFigure(const ini::Configuration &configuration, std::string &figureNam
     return fig;
 }
 
-Figure createCube(const ini::Configuration &configuration, std::string &figureName,
-                Matrix &V) {
+Figure createCube(const ini::Configuration &configuration, std::string &figureName, Matrix &V) {
     const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
     const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
     const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
@@ -132,8 +131,42 @@ Figure createCube(const ini::Configuration &configuration, std::string &figureNa
     return fig;
 }
 
-Figure createTetrahedron(const ini::Configuration &configuration, std::string &figureName,
-                       Matrix &V) {
+Figures3D createFractalCube(const ini::Configuration &configuration, std::string &figureName, Matrix &V) {
+    const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
+    const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
+    const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
+    const double scale = configuration[figureName]["scale"].as_double_or_die();
+    std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
+    std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
+    unsigned int nrIterations;
+    double fractalScale;
+    nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
+    fractalScale = configuration[figureName]["fractalScale"].as_double_or_die();
+
+    Matrix S = Transformation::scaleFigure(scale);
+    Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
+    Matrix rY = Transformation::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = Transformation::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = Transformation::translate(Vector3D::point(center[0], center[1], center[2]));
+
+    Matrix F = S * rX * rY * rZ * T * V;
+
+    Figure fig = PlatonicBodies::getCubeFigure();
+
+    Figures3D fractalFigs;
+    if (nrIterations > 0) fractalFigs = Utils::generateFractal(fig, nrIterations, fractalScale);
+    else fractalFigs.push_back(fig);
+
+    img::Color colorElement(color[0]*255, color[1]*255, color[2]*255);
+    for (auto &curFig : fractalFigs) {
+        curFig.color = colorElement;
+        Transformation::applyTransformation(curFig, F);
+    }
+
+    return fractalFigs;
+}
+
+Figure createTetrahedron(const ini::Configuration &configuration, std::string &figureName, Matrix &V) {
     const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
     const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
     const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
@@ -159,8 +192,42 @@ Figure createTetrahedron(const ini::Configuration &configuration, std::string &f
     return fig;
 }
 
-Figure createOctahedron(const ini::Configuration &configuration, std::string &figureName,
-                      Matrix &V) {
+Figures3D createFractalTetrahedron(const ini::Configuration &configuration, std::string &figureName, Matrix &V) {
+    const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
+    const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
+    const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
+    const double scale = configuration[figureName]["scale"].as_double_or_die();
+    std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
+    std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
+    unsigned int nrIterations;
+    double fractalScale;
+    nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
+    fractalScale = configuration[figureName]["fractalScale"].as_double_or_die();
+
+    Matrix S = Transformation::scaleFigure(scale);
+    Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
+    Matrix rY = Transformation::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = Transformation::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = Transformation::translate(Vector3D::point(center[0], center[1], center[2]));
+
+    Matrix F = S * rX * rY * rZ * T * V;
+
+    Figure fig = PlatonicBodies::getTetrahedronFigure();
+
+    Figures3D fractalFigs;
+    if (nrIterations > 0) fractalFigs = Utils::generateFractal(fig, nrIterations, fractalScale);
+    else fractalFigs.push_back(fig);
+
+    img::Color colorElement(color[0]*255, color[1]*255, color[2]*255);
+    for (auto &curFig : fractalFigs) {
+        curFig.color = colorElement;
+        Transformation::applyTransformation(curFig, F);
+    }
+
+    return fractalFigs;
+}
+
+Figure createOctahedron(const ini::Configuration &configuration, std::string &figureName, Matrix &V) {
     const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
     const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
     const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
@@ -186,8 +253,42 @@ Figure createOctahedron(const ini::Configuration &configuration, std::string &fi
     return fig;
 }
 
-Figure createIcosahedron(const ini::Configuration &configuration, std::string &figureName,
-                       Matrix &V) {
+Figures3D createFractalOctahedron(const ini::Configuration &configuration, std::string &figureName, Matrix &V) {
+    const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
+    const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
+    const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
+    const double scale = configuration[figureName]["scale"].as_double_or_die();
+    std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
+    std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
+    unsigned int nrIterations;
+    double fractalScale;
+    nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
+    fractalScale = configuration[figureName]["fractalScale"].as_double_or_die();
+
+    Matrix S = Transformation::scaleFigure(scale);
+    Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
+    Matrix rY = Transformation::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = Transformation::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = Transformation::translate(Vector3D::point(center[0], center[1], center[2]));
+
+    Matrix F = S * rX * rY * rZ * T * V;
+
+    Figure fig = PlatonicBodies::getOctahedronFigure();
+
+    Figures3D fractalFigs;
+    if (nrIterations > 0) fractalFigs = Utils::generateFractal(fig, nrIterations, fractalScale);
+    else fractalFigs.push_back(fig);
+
+    img::Color colorElement(color[0]*255, color[1]*255, color[2]*255);
+    for (auto &curFig : fractalFigs) {
+        curFig.color = colorElement;
+        Transformation::applyTransformation(curFig, F);
+    }
+
+    return fractalFigs;
+}
+
+Figure createIcosahedron(const ini::Configuration &configuration, std::string &figureName, Matrix &V) {
     const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
     const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
     const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
@@ -213,8 +314,42 @@ Figure createIcosahedron(const ini::Configuration &configuration, std::string &f
     return fig;
 }
 
-Figure createDodecahedron(const ini::Configuration &configuration, std::string &figureName,
-                        Matrix &V) {
+Figures3D createFractalIcosahedron(const ini::Configuration &configuration, std::string &figureName, Matrix &V) {
+    const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
+    const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
+    const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
+    const double scale = configuration[figureName]["scale"].as_double_or_die();
+    std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
+    std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
+    unsigned int nrIterations;
+    double fractalScale;
+    nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
+    fractalScale = configuration[figureName]["fractalScale"].as_double_or_die();
+
+    Matrix S = Transformation::scaleFigure(scale);
+    Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
+    Matrix rY = Transformation::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = Transformation::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = Transformation::translate(Vector3D::point(center[0], center[1], center[2]));
+
+    Matrix F = S * rX * rY * rZ * T * V;
+
+    Figure fig = PlatonicBodies::getIcosahedronFigure();
+
+    Figures3D fractalFigs;
+    if (nrIterations > 0) fractalFigs = Utils::generateFractal(fig, nrIterations, fractalScale);
+    else fractalFigs.push_back(fig);
+
+    img::Color colorElement(color[0]*255, color[1]*255, color[2]*255);
+    for (auto &curFig : fractalFigs) {
+        curFig.color = colorElement;
+        Transformation::applyTransformation(curFig, F);
+    }
+
+    return fractalFigs;
+}
+
+Figure createDodecahedron(const ini::Configuration &configuration, std::string &figureName, Matrix &V) {
     const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
     const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
     const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
@@ -238,6 +373,41 @@ Figure createDodecahedron(const ini::Configuration &configuration, std::string &
     Transformation::applyTransformation(fig, F);
 
     return fig;
+}
+
+Figures3D createFractalDodecahedron(const ini::Configuration &configuration, std::string &figureName, Matrix &V) {
+    const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
+    const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
+    const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
+    const double scale = configuration[figureName]["scale"].as_double_or_die();
+    std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
+    std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
+    unsigned int nrIterations;
+    double fractalScale;
+    nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
+    fractalScale = configuration[figureName]["fractalScale"].as_double_or_die();
+
+    Matrix S = Transformation::scaleFigure(scale);
+    Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
+    Matrix rY = Transformation::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = Transformation::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = Transformation::translate(Vector3D::point(center[0], center[1], center[2]));
+
+    Matrix F = S * rX * rY * rZ * T * V;
+
+    Figure fig = PlatonicBodies::getDodecahedronFigure();
+
+    Figures3D fractalFigs;
+    if (nrIterations > 0) fractalFigs = Utils::generateFractal(fig, nrIterations, fractalScale);
+    else fractalFigs.push_back(fig);
+
+    img::Color colorElement(color[0]*255, color[1]*255, color[2]*255);
+    for (auto &curFig : fractalFigs) {
+        curFig.color = colorElement;
+        Transformation::applyTransformation(curFig, F);
+    }
+
+    return fractalFigs;
 }
 
 Figure createSphere(const ini::Configuration &configuration, std::string &figureName, Matrix &V) {
@@ -414,6 +584,67 @@ Figure createTorus(const ini::Configuration &configuration, std::string &figureN
     return fig;
 }
 
+Figure createBuckyBall(const ini::Configuration &configuration, std::string &figureName, Matrix &V) {
+    const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
+    const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
+    const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
+    const double scale = configuration[figureName]["scale"].as_double_or_die();
+    std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
+    std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
+
+    Matrix S = Transformation::scaleFigure(scale);
+    Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
+    Matrix rY = Transformation::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = Transformation::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = Transformation::translate(Vector3D::point(center[0], center[1], center[2]));
+
+    Matrix F = S * rX * rY * rZ * T * V;
+
+    Figure fig = PlatonicBodies::getBuckyBall();
+
+    img::Color colorElement(color[0]*255, color[1]*255, color[2]*255);
+    fig.color = colorElement;
+
+    Transformation::applyTransformation(fig, F);
+
+    return fig;
+}
+
+Figures3D createFractalBuckyBall(const ini::Configuration &configuration, std::string &figureName, Matrix &V) {
+    const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
+    const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
+    const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
+    const double scale = configuration[figureName]["scale"].as_double_or_die();
+    std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
+    std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
+    unsigned int nrIterations;
+    double fractalScale;
+    nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
+    fractalScale = configuration[figureName]["fractalScale"].as_double_or_die();
+
+    Matrix S = Transformation::scaleFigure(scale);
+    Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
+    Matrix rY = Transformation::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = Transformation::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = Transformation::translate(Vector3D::point(center[0], center[1], center[2]));
+
+    Matrix F = S * rX * rY * rZ * T * V;
+
+    Figure fig = PlatonicBodies::getBuckyBall();
+
+    Figures3D fractalFigs;
+    if (nrIterations > 0) fractalFigs = Utils::generateFractal(fig, nrIterations, fractalScale);
+    else fractalFigs.push_back(fig);
+
+    img::Color colorElement(color[0]*255, color[1]*255, color[2]*255);
+    for (auto &curFig : fractalFigs) {
+        curFig.color = colorElement;
+        Transformation::applyTransformation(curFig, F);
+    }
+
+    return fractalFigs;
+}
+
 img::EasyImage Lines3D::wireframe(const ini::Configuration &configuration) {
     Figures3D figures;
 
@@ -430,28 +661,41 @@ img::EasyImage Lines3D::wireframe(const ini::Configuration &configuration) {
 
         std::string type = configuration[figureName]["type"].as_string_or_die();
 
-        if (type == "LineDrawing") {
-            figures.push_back(eyeFigure(configuration, figureName, V));
-        } else if (type == "Cube") {
-            figures.push_back(createCube(configuration, figureName, V));
-        } else if (type == "Tetrahedron") {
-            figures.push_back(createTetrahedron(configuration, figureName, V));
-        } else if (type == "Octahedron") {
-            figures.push_back(createOctahedron(configuration, figureName, V));
-        } else if (type == "Icosahedron") {
-            figures.push_back(createIcosahedron(configuration, figureName, V));
-        } else if (type == "Dodecahedron") {
-            figures.push_back(createDodecahedron(configuration, figureName, V));
-        } else if (type == "Sphere") {
-            figures.push_back(createSphere(configuration, figureName, V));
-        } else if (type == "Cone") {
-            figures.push_back(createCone(configuration, figureName, V));
-        } else if (type == "Cylinder") {
-            figures.push_back(createCylinder(configuration, figureName, V));
-        } else if (type == "Torus") {
-            figures.push_back(createTorus(configuration, figureName, V));
-        } else if (type == "3DLSystem") {
-            figures.push_back(LSystem3D::LSystem3D(configuration, figureName, V));
+        if (type == "LineDrawing") figures.push_back(eyeFigure(configuration, figureName, V));
+        else if (type == "Cube") figures.push_back(createCube(configuration, figureName, V));
+        else if (type == "Tetrahedron") figures.push_back(createTetrahedron(configuration, figureName, V));
+        else if (type == "Octahedron") figures.push_back(createOctahedron(configuration, figureName, V));
+        else if (type == "Icosahedron") figures.push_back(createIcosahedron(configuration, figureName, V));
+        else if (type == "Dodecahedron") figures.push_back(createDodecahedron(configuration, figureName, V));
+        else if (type == "Sphere") figures.push_back(createSphere(configuration, figureName, V));
+        else if (type == "Cone") figures.push_back(createCone(configuration, figureName, V));
+        else if (type == "Cylinder") figures.push_back(createCylinder(configuration, figureName, V));
+        else if (type == "Torus") figures.push_back(createTorus(configuration, figureName, V));
+        else if (type == "3DLSystem") figures.push_back(LSystem3D::LSystem3D(configuration, figureName, V));
+        else if (type == "FractalCube") {
+            Figures3D fractalFigs = createFractalCube(configuration, figureName, V);
+            for (auto &curFig : fractalFigs) figures.push_back(curFig);
+        }
+        else if (type == "FractalTetrahedron") {
+            Figures3D fractalFigs = createFractalTetrahedron(configuration, figureName, V);
+            for (auto &curFig : fractalFigs) figures.push_back(curFig);
+        }
+        else if (type == "FractalOctahedron") {
+            Figures3D fractalFigs = createFractalOctahedron(configuration, figureName, V);
+            for (auto &curFig : fractalFigs) figures.push_back(curFig);
+        }
+        else if (type == "FractalIcosahedron") {
+            Figures3D fractalFigs = createFractalIcosahedron(configuration, figureName, V);
+            for (auto &curFig : fractalFigs) figures.push_back(curFig);
+        }
+        else if (type == "FractalDodecahedron") {
+            Figures3D fractalFigs = createFractalDodecahedron(configuration, figureName, V);
+            for (auto &curFig : fractalFigs) figures.push_back(curFig);
+        }
+        else if (type == "BuckyBall") figures.push_back(createBuckyBall(configuration, figureName, V));
+        else if (type == "FractalBuckyBall") {
+            Figures3D fractalFigs = createFractalBuckyBall(configuration, figureName, V);
+            for (auto &curFig : fractalFigs) figures.push_back(curFig);
         }
     }
 
@@ -476,101 +720,45 @@ img::EasyImage Lines3D::zBufferWireframe(const ini::Configuration &configuration
 
         std::string type = configuration[figureName]["type"].as_string_or_die();
 
-        if (type == "LineDrawing") {
-            figures.push_back(eyeFigure(configuration, figureName, V));
-        } else if (type == "Cube") {
-            figures.push_back(createCube(configuration, figureName, V));
-        } else if (type == "Tetrahedron") {
-            figures.push_back(createTetrahedron(configuration, figureName, V));
-        } else if (type == "Octahedron") {
-            figures.push_back(createOctahedron(configuration, figureName, V));
-        } else if (type == "Icosahedron") {
-            figures.push_back(createIcosahedron(configuration, figureName, V));
-        } else if (type == "Dodecahedron") {
-            figures.push_back(createDodecahedron(configuration, figureName, V));
-        } else if (type == "Sphere") {
-            figures.push_back(createSphere(configuration, figureName, V));
-        } else if (type == "Cone") {
-            figures.push_back(createCone(configuration, figureName, V));
-        } else if (type == "Cylinder") {
-            figures.push_back(createCylinder(configuration, figureName, V));
-        } else if (type == "Torus") {
-            figures.push_back(createTorus(configuration, figureName, V));
-        } else if (type == "3DLSystem") {
-            figures.push_back(LSystem3D::LSystem3D(configuration, figureName, V));
+        if (type == "LineDrawing") figures.push_back(eyeFigure(configuration, figureName, V));
+        else if (type == "Cube") figures.push_back(createCube(configuration, figureName, V));
+        else if (type == "Tetrahedron") figures.push_back(createTetrahedron(configuration, figureName, V));
+        else if (type == "Octahedron") figures.push_back(createOctahedron(configuration, figureName, V));
+        else if (type == "Icosahedron") figures.push_back(createIcosahedron(configuration, figureName, V));
+        else if (type == "Dodecahedron") figures.push_back(createDodecahedron(configuration, figureName, V));
+        else if (type == "Sphere") figures.push_back(createSphere(configuration, figureName, V));
+        else if (type == "Cone") figures.push_back(createCone(configuration, figureName, V));
+        else if (type == "Cylinder") figures.push_back(createCylinder(configuration, figureName, V));
+        else if (type == "Torus") figures.push_back(createTorus(configuration, figureName, V));
+        else if (type == "3DLSystem") figures.push_back(LSystem3D::LSystem3D(configuration, figureName, V));
+        else if (type == "FractalCube") {
+            Figures3D fractalFigs = createFractalCube(configuration, figureName, V);
+            for (auto &curFig : fractalFigs) figures.push_back(curFig);
+        }
+        else if (type == "FractalTetrahedron") {
+            Figures3D fractalFigs = createFractalTetrahedron(configuration, figureName, V);
+            for (auto &curFig : fractalFigs) figures.push_back(curFig);
+        }
+        else if (type == "FractalOctahedron") {
+            Figures3D fractalFigs = createFractalOctahedron(configuration, figureName, V);
+            for (auto &curFig : fractalFigs) figures.push_back(curFig);
+        }
+        else if (type == "FractalIcosahedron") {
+            Figures3D fractalFigs = createFractalIcosahedron(configuration, figureName, V);
+            for (auto &curFig : fractalFigs) figures.push_back(curFig);
+        }
+        else if (type == "FractalDodecahedron") {
+            Figures3D fractalFigs = createFractalDodecahedron(configuration, figureName, V);
+            for (auto &curFig : fractalFigs) figures.push_back(curFig);
+        }
+        else if (type == "BuckyBall") figures.push_back(createBuckyBall(configuration, figureName, V));
+        else if (type == "FractalBuckyBall") {
+            Figures3D fractalFigs = createFractalBuckyBall(configuration, figureName, V);
+            for (auto &curFig : fractalFigs) figures.push_back(curFig);
         }
     }
 
     Lines2D lines = doProjection(figures);
 
     return coordToPixel(lines, size, backgroundColorElement, true);
-}
-
-img::EasyImage Lines3D::zBuffer(const ini::Configuration &configuration) {
-    Figures3D figures;
-
-    const unsigned int size = configuration["General"]["size"].as_int_or_die();
-    std::vector<double> backgroundColor = configuration["General"]["backgroundcolor"].as_double_tuple_or_die();
-    img::Color backgroundColorElement(backgroundColor[0] * 255, backgroundColor[1] * 255, backgroundColor[2] * 255);
-    const unsigned int nrFigures = configuration["General"]["nrFigures"].as_int_or_die();
-    std::vector<double> eye = configuration["General"]["eye"].as_double_tuple_or_die();
-
-    Matrix V = Transformation::eyePointTrans(Vector3D::point(eye[0], eye[1], eye[2]));
-
-    for (unsigned int i = 0; i < nrFigures; i++) {
-        std::string figureName = "Figure" + std::to_string(i);
-
-        std::string type = configuration[figureName]["type"].as_string_or_die();
-
-        Figure currentFig;
-
-        if (type == "LineDrawing") {
-            currentFig = eyeFigure(configuration, figureName, V);
-        } else if (type == "Cube") {
-            currentFig = createCube(configuration, figureName, V);
-        } else if (type == "Tetrahedron") {
-            currentFig = createTetrahedron(configuration, figureName, V);
-        } else if (type == "Octahedron") {
-            currentFig = createOctahedron(configuration, figureName, V);
-        } else if (type == "Icosahedron") {
-            currentFig = createIcosahedron(configuration, figureName, V);
-        } else if (type == "Dodecahedron") {
-            currentFig = createDodecahedron(configuration, figureName, V);
-        } else if (type == "Sphere") {
-            currentFig = createSphere(configuration, figureName, V);
-        } else if (type == "Cone") {
-            currentFig = createCone(configuration, figureName, V);
-        } else if (type == "Cylinder") {
-            currentFig = createCylinder(configuration, figureName, V);
-        } else if (type == "Torus") {
-            currentFig = createTorus(configuration, figureName, V);
-        }
-
-        std::vector<Face> newFaces;
-        for (auto &f : currentFig.faces) {
-            if (f.point_indexes.size() > 3) {
-                std::vector<Face> tempNewFaces;
-                tempNewFaces = Utils::triangulate(f);
-                for (auto &f2 : tempNewFaces) newFaces.push_back(f2);
-            } else newFaces.push_back(f);
-        }
-        currentFig.faces = newFaces;
-        figures.push_back(currentFig);
-    }
-
-    Lines2D projection = doProjectionConst(figures);
-    double width, height, d, dx, dy;
-    Utils::calculateValues(projection, size, width, height, d, dx, dy);
-
-    img::EasyImage image(lround(width), lround(height), backgroundColorElement);
-    ZBuffer buffer(image.get_width(), image.get_height());
-
-    for (auto &curFig : figures) {
-        for (auto &curFace : curFig.faces) {
-            image.draw_zbuf_triag(buffer, curFig.points[curFace.point_indexes[0]], curFig.points[curFace.point_indexes[1]],
-                                  curFig.points[curFace.point_indexes[2]], d, dx, dy, curFig.color);
-        }
-    }
-
-    return image;
 }

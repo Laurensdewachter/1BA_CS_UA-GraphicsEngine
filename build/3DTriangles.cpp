@@ -11,8 +11,30 @@ img::EasyImage Triangles3D::zBuffer(const ini::Configuration &configuration) {
     img::Color backgroundColorElement(backgroundColor[0] * 255, backgroundColor[1] * 255, backgroundColor[2] * 255);
     const unsigned int nrFigures = configuration["General"]["nrFigures"].as_int_or_die();
     std::vector<double> eye = configuration["General"]["eye"].as_double_tuple_or_die();
+    //bool clipping = false;
+    //std::vector<double> viewDirection;
+    //double hfov, aspectRatio, dNear, dFar;
 
-    Matrix V = Transformation::eyePointTrans(Vector3D::point(eye[0], eye[1], eye[2]));
+    Matrix V;
+    /*
+    if (configuration["General"]["clipping"].as_bool_if_exists(clipping)) {
+        viewDirection = configuration["General"]["viewDirection"].as_double_tuple_or_die();
+        hfov = configuration["General"]["hfov"].as_double_or_die();
+        aspectRatio = configuration["General"]["aspectRatio"].as_double_or_die();
+        dNear = configuration["General"]["dNear"].as_double_or_die();
+        dFar = configuration["General"]["dFar"].as_double_or_die();
+
+        double thetaDir, phiDir, rDir;
+        Utils::toPolar(Vector3D::vector(-viewDirection[0], -viewDirection[1], -viewDirection[2]), thetaDir, phiDir, rDir);
+        double thetaPos, phiPos, rPos;
+        Utils::toPolar(Vector3D::point(eye[0], eye[1], eye[2]), thetaPos, phiPos, rPos);
+
+        V = Transformation::clippingTrans(thetaDir, phiDir, rPos);
+    } else {
+        V = Transformation::eyePointTrans(Vector3D::point(eye[0], eye[1], eye[2]));
+    }
+     */
+    V = Transformation::eyePointTrans(Vector3D::point(eye[0], eye[1], eye[2]));
 
     for (unsigned int i = 0; i < nrFigures; i++) {
         std::string figureName = "Figure" + std::to_string(i);
@@ -21,26 +43,39 @@ img::EasyImage Triangles3D::zBuffer(const ini::Configuration &configuration) {
 
         Figure currentFig;
 
-        if (type == "LineDrawing") {
-            currentFig = eyeFigure(configuration, figureName, V);
-        } else if (type == "Cube") {
-            currentFig = createCube(configuration, figureName, V);
-        } else if (type == "Tetrahedron") {
-            currentFig = createTetrahedron(configuration, figureName, V);
-        } else if (type == "Octahedron") {
-            currentFig = createOctahedron(configuration, figureName, V);
-        } else if (type == "Icosahedron") {
-            currentFig = createIcosahedron(configuration, figureName, V);
-        } else if (type == "Dodecahedron") {
-            currentFig = createDodecahedron(configuration, figureName, V);
-        } else if (type == "Sphere") {
-            currentFig = createSphere(configuration, figureName, V);
-        } else if (type == "Cone") {
-            currentFig = createCone(configuration, figureName, V);
-        } else if (type == "Cylinder") {
-            currentFig = createCylinder(configuration, figureName, V);
-        } else if (type == "Torus") {
-            currentFig = createTorus(configuration, figureName, V);
+        if (type == "Cube") figures.push_back(createCube(configuration, figureName, V));
+        else if (type == "Tetrahedron") figures.push_back(createTetrahedron(configuration, figureName, V));
+        else if (type == "Octahedron") figures.push_back(createOctahedron(configuration, figureName, V));
+        else if (type == "Icosahedron") figures.push_back(createIcosahedron(configuration, figureName, V));
+        else if (type == "Dodecahedron") figures.push_back(createDodecahedron(configuration, figureName, V));
+        else if (type == "Sphere") figures.push_back(createSphere(configuration, figureName, V));
+        else if (type == "Cone") figures.push_back(createCone(configuration, figureName, V));
+        else if (type == "Cylinder") figures.push_back(createCylinder(configuration, figureName, V));
+        else if (type == "Torus") figures.push_back(createTorus(configuration, figureName, V));
+        else if (type == "FractalCube") {
+            Figures3D fractalFigs = createFractalCube(configuration, figureName, V);
+            for (auto &curFig : fractalFigs) figures.push_back(curFig);
+        }
+        else if (type == "FractalTetrahedron") {
+            Figures3D fractalFigs = createFractalTetrahedron(configuration, figureName, V);
+            for (auto &curFig : fractalFigs) figures.push_back(curFig);
+        }
+        else if (type == "FractalOctahedron") {
+            Figures3D fractalFigs = createFractalOctahedron(configuration, figureName, V);
+            for (auto &curFig : fractalFigs) figures.push_back(curFig);
+        }
+        else if (type == "FractalIcosahedron") {
+            Figures3D fractalFigs = createFractalIcosahedron(configuration, figureName, V);
+            for (auto &curFig : fractalFigs) figures.push_back(curFig);
+        }
+        else if (type == "FractalDodecahedron") {
+            Figures3D fractalFigs = createFractalDodecahedron(configuration, figureName, V);
+            for (auto &curFig : fractalFigs) figures.push_back(curFig);
+        }
+        else if (type == "BuckyBall") figures.push_back(createBuckyBall(configuration, figureName, V));
+        else if (type == "FractalBuckyBall") {
+            Figures3D fractalFigs = createFractalBuckyBall(configuration, figureName, V);
+            for (auto &curFig : fractalFigs) figures.push_back(curFig);
         }
 
         std::vector<Face> newFaces;
@@ -52,6 +87,9 @@ img::EasyImage Triangles3D::zBuffer(const ini::Configuration &configuration) {
             } else newFaces.push_back(f);
         }
         currentFig.faces = newFaces;
+
+
+
         figures.push_back(currentFig);
     }
 

@@ -18,6 +18,8 @@ namespace Transformation {
     Matrix eyePointTrans(const Vector3D &eyepoint);
 
     void applyTransformation(Figure &fig, const Matrix &M);
+
+    Matrix clippingTrans(const double theta, const double phi, const double r);
 };
 
 

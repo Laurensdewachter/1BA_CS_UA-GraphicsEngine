@@ -1,5 +1,5 @@
 #include "Utils.h"
-
+#include "Transformation.h"
 #include <cmath>
 
 void Utils::toPolar(const Vector3D &point, double &theta, double &phi, double &r) {
@@ -85,4 +85,36 @@ void Utils::calculateValues(Lines2D &lines, double size, double &width, double &
     double DCy = d * ((yMax + yMin)/2.0);
     dx = (width/2.0) - DCx;
     dy = (height/2.0) - DCy;
+}
+
+Figures3D Utils::generateFractal(Figure &fig, const unsigned int nrIterations, const double scale) {
+    std::vector<Figure> toConvert = {fig};
+    std::vector<Figure> newFigs;
+
+    for (unsigned int it = 0; it < nrIterations; it++) {
+        newFigs.clear();
+        for (auto & curFig : toConvert) {
+            for (unsigned int pointIndex = 0; pointIndex < curFig.points.size(); pointIndex++) {
+                Vector3D curPoint = curFig.points[pointIndex];
+
+                Figure newFig = curFig;
+                Matrix S = Transformation::scaleFigure(1 / scale);
+                Transformation::applyTransformation(newFig, S);
+
+                Matrix T = Transformation::translate(curPoint - newFig.points[pointIndex]);
+                Transformation::applyTransformation(newFig, T);
+
+                newFigs.push_back(newFig);
+            }
+        }
+        toConvert = newFigs;
+    }
+
+    Figures3D result;
+    for (auto &curFig : newFigs) result.push_back(curFig);
+    return result;
+}
+
+void Utils::clip(Figure &fig, const double hfov, const double aspectRatio, const double dNear, const double hFar) {
+
 }

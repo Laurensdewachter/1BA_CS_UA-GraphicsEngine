@@ -11,6 +11,7 @@ public:
     static Figure* octahedronFigure;
     static Figure* icosahedronFigure;
     static Figure* dodecahedronFigure;
+    static Figure* buckyBallFigure;
 
     PlatonicBodies();
 
@@ -23,6 +24,8 @@ public:
     static Figure getIcosahedronFigure();
 
     static Figure getDodecahedronFigure();
+
+    static Figure getBuckyBall();
 };
 
 #endif
