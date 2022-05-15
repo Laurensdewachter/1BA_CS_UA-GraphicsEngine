@@ -242,21 +242,21 @@ Figure PlatonicBodies::getBuckyBall() {
         Face face19({18, 19, 42, 43, 46, 47});
         Face face20({3, 4, 18, 47, 20});
         Face face21({47, 46, 48, 49, 21, 20});
-        Face face22({3, 4, 18, 47, 20});
-        Face face23({22, 21, 49, 50, 24});
-        Face face24({25, 24, 50, 51, 53, 52});
-        Face face25({28, 26, 25, 52, 33});
-        Face face26({32, 33, 52, 53, 55, 54});
-        Face face27({34, 31, 32, 54, 39});
-        Face face28({38, 39, 54, 55, 57, 56});
-        Face face29({40, 37, 38, 56, 45});
-        Face face30({44, 45, 56, 57, 59, 58});
-        Face face31({49, 48, 58, 59, 51, 50});
-        Face face32({51, 53, 55, 57, 59});
+        Face face22({22, 21, 49, 50, 24});
+        Face face23({25, 24, 50, 51, 53, 52});
+        Face face24({28, 26, 25, 52, 33});
+        Face face25({32, 33, 52, 53, 55, 54});
+        Face face26({34, 31, 32, 54, 39});
+        Face face27({38, 39, 54, 55, 57, 56});
+        Face face28({40, 37, 38, 56, 45});
+        Face face29({44, 45, 56, 57, 59, 58});
+        Face face30({49, 48, 58, 59, 51, 50});
+        Face face31({51, 53, 55, 57, 59});
+        Face face32({46, 43, 44, 58, 48});
 
         buckyBallFigure->faces = {face1, face2, face3, face4, face5, face6, face7, face8, face9, face10, face11,
                                   face12, face13, face14, face15, face16, face17, face18, face19, face20, face21,
-                                  face22, face23, face24, face25, face26, face27, face28, face29, face30, face31, face32};
+                                  face22, face23, face24, face25, face26, face27, face28, face29, face30, face31, face32, face32};
     }
     return *buckyBallFigure;
 }

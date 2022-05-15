@@ -44,15 +44,18 @@ void Utils::splitTriangles(Figure &figure) {
     figure = newFig;
 }
 
-std::vector<Face> Utils::triangulate(const Face &face) {
+void Utils::triangulate(Figure &fig) {
     std::vector<Face> newFaces;
 
-    for (unsigned int i = 1; i < face.point_indexes.size()-1; i++) {
-        Face newFace({face.point_indexes[0], face.point_indexes[i], face.point_indexes[i+1]});
-        newFaces.push_back(newFace);
+    for (auto &f: fig.faces) {
+        if (f.point_indexes.size() > 3) {
+            for (unsigned int i = 1; i < f.point_indexes.size()-1; i++) {
+                Face newFace({f.point_indexes[0], f.point_indexes[i], f.point_indexes[i+1]});
+                newFaces.push_back(newFace);
+            }
+        } else newFaces.push_back(f);
     }
-
-    return newFaces;
+    fig.faces = newFaces;
 }
 
 void Utils::calculateValues(Lines2D &lines, double size, double &width, double &height, double &d, double &dx, double &dy) {
@@ -153,8 +156,4 @@ Figures3D Utils::generateMengerSponge(Figure &fig, unsigned int nrIterations) {
     Figures3D result;
     for (auto &curFig : newFigs) result.push_back(curFig);
     return result;
-}
-
-void Utils::clip(Figure &fig, const double hfov, const double aspectRatio, const double dNear, const double hFar) {
-
 }

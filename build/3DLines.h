@@ -48,9 +48,7 @@ Figures3D createFractalBuckyBall(const ini::Configuration &configuration, std::s
 Figures3D createMengerSponge(const ini::Configuration &configuration, std::string &figureName, Matrix &V);
 
 namespace Lines3D {
-    img::EasyImage wireframe(const ini::Configuration &configuration);
-
-    img::EasyImage zBufferWireframe(const ini::Configuration &configuration);
+    img::EasyImage wireframe(const ini::Configuration &configuration, bool zBuffer);
 }
 
 #endif

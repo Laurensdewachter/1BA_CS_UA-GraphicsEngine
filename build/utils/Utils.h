@@ -10,16 +10,13 @@ namespace Utils {
 
     void splitTriangles(Figure &figure);
 
-    std::vector<Face> triangulate(const Face &face);
+    void triangulate(Figure &fig);
 
     void calculateValues(Lines2D &lines, double size, double &width, double &height, double &d, double &dx, double &dy);
 
     Figures3D generateFractal(Figure &fig, unsigned int nrIterations, double scale);
 
     Figures3D generateMengerSponge(Figure &fig, unsigned int nrIterations);
-
-    void clip(Figure &fig, const double hfov, const double aspectRatio, const double dNear, const double hFar);
-};
-
+}
 
 #endif

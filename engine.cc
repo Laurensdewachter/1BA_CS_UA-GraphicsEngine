@@ -16,8 +16,8 @@ img::EasyImage generate_image(const ini::Configuration &configuration) {
     else if (type == "IntroBlocks") return intro::generate_blocks(configuration);
     else if (type == "IntroLines") return intro::generate_lines(configuration);
     else if (type == "2DLSystem") return LSystem2D::LSystem2D(configuration);
-    else if (type == "Wireframe") return Lines3D::wireframe(configuration);
-    else if (type == "ZBufferedWireframe") return Lines3D::zBufferWireframe(configuration);
+    else if (type == "Wireframe") return Lines3D::wireframe(configuration, false);
+    else if (type == "ZBufferedWireframe") return Lines3D::wireframe(configuration, true);
     else return Triangles3D::zBuffer(configuration);
 }
 

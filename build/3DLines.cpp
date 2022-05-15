@@ -665,7 +665,7 @@ Figures3D createMengerSponge(const ini::Configuration &configuration, std::strin
     return fractalFigs;
 }
 
-img::EasyImage Lines3D::wireframe(const ini::Configuration &configuration) {
+img::EasyImage Lines3D::wireframe(const ini::Configuration &configuration, bool zBuffer) {
     Figures3D figures;
 
     const unsigned int size = configuration["General"]["size"].as_int_or_die();
@@ -676,117 +676,41 @@ img::EasyImage Lines3D::wireframe(const ini::Configuration &configuration) {
 
     Matrix V = Transformation::eyePointTrans(Vector3D::point(eye[0], eye[1], eye[2]));
 
-    for (unsigned int i = 0; i < nrFigures; i++) {
-        std::string figureName = "Figure" + std::to_string(i);
-
-        std::string type = configuration[figureName]["type"].as_string_or_die();
-
-        if (type == "LineDrawing") figures.push_back(eyeFigure(configuration, figureName, V));
-        else if (type == "Cube") figures.push_back(createCube(configuration, figureName, V));
-        else if (type == "Tetrahedron") figures.push_back(createTetrahedron(configuration, figureName, V));
-        else if (type == "Octahedron") figures.push_back(createOctahedron(configuration, figureName, V));
-        else if (type == "Icosahedron") figures.push_back(createIcosahedron(configuration, figureName, V));
-        else if (type == "Dodecahedron") figures.push_back(createDodecahedron(configuration, figureName, V));
-        else if (type == "Sphere") figures.push_back(createSphere(configuration, figureName, V));
-        else if (type == "Cone") figures.push_back(createCone(configuration, figureName, V));
-        else if (type == "Cylinder") figures.push_back(createCylinder(configuration, figureName, V));
-        else if (type == "Torus") figures.push_back(createTorus(configuration, figureName, V));
-        else if (type == "3DLSystem") figures.push_back(LSystem3D::LSystem3D(configuration, figureName, V));
-        else if (type == "FractalCube") {
-            Figures3D fractalFigs = createFractalCube(configuration, figureName, V);
-            for (auto &curFig : fractalFigs) figures.push_back(curFig);
-        }
-        else if (type == "FractalTetrahedron") {
-            Figures3D fractalFigs = createFractalTetrahedron(configuration, figureName, V);
-            for (auto &curFig : fractalFigs) figures.push_back(curFig);
-        }
-        else if (type == "FractalOctahedron") {
-            Figures3D fractalFigs = createFractalOctahedron(configuration, figureName, V);
-            for (auto &curFig : fractalFigs) figures.push_back(curFig);
-        }
-        else if (type == "FractalIcosahedron") {
-            Figures3D fractalFigs = createFractalIcosahedron(configuration, figureName, V);
-            for (auto &curFig : fractalFigs) figures.push_back(curFig);
-        }
-        else if (type == "FractalDodecahedron") {
-            Figures3D fractalFigs = createFractalDodecahedron(configuration, figureName, V);
-            for (auto &curFig : fractalFigs) figures.push_back(curFig);
-        }
-        else if (type == "BuckyBall") figures.push_back(createBuckyBall(configuration, figureName, V));
-        else if (type == "FractalBuckyBall") {
-            Figures3D fractalFigs = createFractalBuckyBall(configuration, figureName, V);
-            for (auto &curFig : fractalFigs) figures.push_back(curFig);
-        }
-        else if (type == "MengerSponge") {
-            Figures3D fractalFigs = createMengerSponge(configuration, figureName, V);
-            for (auto &curFig : fractalFigs) figures.push_back(curFig);
-        }
-    }
-
-    Lines2D lines = doProjection(figures);
-
-    return coordToPixel(lines, size, backgroundColorElement);
-}
-
-img::EasyImage Lines3D::zBufferWireframe(const ini::Configuration &configuration) {
-    Figures3D figures;
-
-    const unsigned int size = configuration["General"]["size"].as_int_or_die();
-    std::vector<double> backgroundColor = configuration["General"]["backgroundcolor"].as_double_tuple_or_die();
-    img::Color backgroundColorElement(backgroundColor[0]*255, backgroundColor[1]*255, backgroundColor[2]*255);
-    const unsigned int nrFigures = configuration["General"]["nrFigures"].as_int_or_die();
-    std::vector<double> eye = configuration["General"]["eye"].as_double_tuple_or_die();
-
-    Matrix V = Transformation::eyePointTrans(Vector3D::point(eye[0], eye[1], eye[2]));
+    Figures3D currentFigs;
 
     for (unsigned int i = 0; i < nrFigures; i++) {
         std::string figureName = "Figure" + std::to_string(i);
 
         std::string type = configuration[figureName]["type"].as_string_or_die();
 
-        if (type == "LineDrawing") figures.push_back(eyeFigure(configuration, figureName, V));
-        else if (type == "Cube") figures.push_back(createCube(configuration, figureName, V));
-        else if (type == "Tetrahedron") figures.push_back(createTetrahedron(configuration, figureName, V));
-        else if (type == "Octahedron") figures.push_back(createOctahedron(configuration, figureName, V));
-        else if (type == "Icosahedron") figures.push_back(createIcosahedron(configuration, figureName, V));
-        else if (type == "Dodecahedron") figures.push_back(createDodecahedron(configuration, figureName, V));
-        else if (type == "Sphere") figures.push_back(createSphere(configuration, figureName, V));
-        else if (type == "Cone") figures.push_back(createCone(configuration, figureName, V));
-        else if (type == "Cylinder") figures.push_back(createCylinder(configuration, figureName, V));
-        else if (type == "Torus") figures.push_back(createTorus(configuration, figureName, V));
-        else if (type == "3DLSystem") figures.push_back(LSystem3D::LSystem3D(configuration, figureName, V));
-        else if (type == "FractalCube") {
-            Figures3D fractalFigs = createFractalCube(configuration, figureName, V);
-            for (auto &curFig : fractalFigs) figures.push_back(curFig);
-        }
-        else if (type == "FractalTetrahedron") {
-            Figures3D fractalFigs = createFractalTetrahedron(configuration, figureName, V);
-            for (auto &curFig : fractalFigs) figures.push_back(curFig);
-        }
-        else if (type == "FractalOctahedron") {
-            Figures3D fractalFigs = createFractalOctahedron(configuration, figureName, V);
-            for (auto &curFig : fractalFigs) figures.push_back(curFig);
-        }
-        else if (type == "FractalIcosahedron") {
-            Figures3D fractalFigs = createFractalIcosahedron(configuration, figureName, V);
-            for (auto &curFig : fractalFigs) figures.push_back(curFig);
-        }
-        else if (type == "FractalDodecahedron") {
-            Figures3D fractalFigs = createFractalDodecahedron(configuration, figureName, V);
-            for (auto &curFig : fractalFigs) figures.push_back(curFig);
-        }
-        else if (type == "BuckyBall") figures.push_back(createBuckyBall(configuration, figureName, V));
-        else if (type == "FractalBuckyBall") {
-            Figures3D fractalFigs = createFractalBuckyBall(configuration, figureName, V);
-            for (auto &curFig : fractalFigs) figures.push_back(curFig);
-        }
-        else if (type == "MengerSponge") {
-            Figures3D fractalFigs = createMengerSponge(configuration, figureName, V);
-            for (auto &curFig : fractalFigs) figures.push_back(curFig);
-        }
+        if (type == "LineDrawing") currentFigs = {eyeFigure(configuration, figureName, V)};
+        else if (type == "Cube") currentFigs = {createCube(configuration, figureName, V)};
+        else if (type == "Tetrahedron") currentFigs = {createTetrahedron(configuration, figureName, V)};
+        else if (type == "Octahedron") currentFigs = {createOctahedron(configuration, figureName, V)};
+        else if (type == "Icosahedron") currentFigs = {createIcosahedron(configuration, figureName, V)};
+        else if (type == "Dodecahedron") currentFigs = {createDodecahedron(configuration, figureName, V)};
+        else if (type == "Sphere") currentFigs = {createSphere(configuration, figureName, V)};
+        else if (type == "Cone") currentFigs = {createCone(configuration, figureName, V)};
+        else if (type == "Cylinder") currentFigs = {createCylinder(configuration, figureName, V)};
+        else if (type == "Torus") currentFigs = {createTorus(configuration, figureName, V)};
+        else if (type == "3DLSystem") currentFigs = {LSystem3D::LSystem3D(configuration, figureName, V)};
+        else if (type == "FractalCube") currentFigs = createFractalCube(configuration, figureName, V);
+        else if (type == "FractalTetrahedron") currentFigs = createFractalTetrahedron(configuration, figureName, V);
+        else if (type == "FractalOctahedron") currentFigs = createFractalOctahedron(configuration, figureName, V);
+        else if (type == "FractalIcosahedron") currentFigs = createFractalIcosahedron(configuration, figureName, V);
+        else if (type == "FractalDodecahedron") currentFigs = createFractalDodecahedron(configuration, figureName, V);
+        else if (type == "BuckyBall") currentFigs = {createBuckyBall(configuration, figureName, V)};
+        else if (type == "FractalBuckyBall") currentFigs = createFractalBuckyBall(configuration, figureName, V);
+        else if (type == "MengerSponge") currentFigs = createMengerSponge(configuration, figureName, V);
+
+        for (auto &curFig : currentFigs) figures.push_back(curFig);
     }
 
     Lines2D lines = doProjection(figures);
 
-    return coordToPixel(lines, size, backgroundColorElement, true);
+    if (zBuffer) {
+        return coordToPixel(lines, size, backgroundColorElement, true);
+    } else {
+        return coordToPixel(lines, size, backgroundColorElement);
+    }
 }
