@@ -1,5 +1,5 @@
 #include "3DLSystem.h"
-#include "../utils/l_parser.h"
+#include "l_parser.h"
 #include "../utils/Transformation.h"
 
 #include <fstream>
@@ -46,7 +46,7 @@ Figure LSystem3D::LSystem3D(const ini::Configuration &configuration, const std::
     Figure fig;
 
     img::Color colorElement(color[0]*255, color[1]*255, color[2]*255);
-    fig.color = colorElement;
+    fig.ambientReflection = colorElement;
 
     fig.points.push_back(curPoint);
     int indexCounter = 0;

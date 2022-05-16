@@ -4,6 +4,7 @@
 #include "build/LSystems/2DLSystem.h"
 #include "build/3DLines.h"
 #include "build/3DTriangles.h"
+#include "build/Light.h"
 
 #include <iostream>
 #include <string>
@@ -18,7 +19,9 @@ img::EasyImage generate_image(const ini::Configuration &configuration) {
     else if (type == "2DLSystem") return LSystem2D::LSystem2D(configuration);
     else if (type == "Wireframe") return Lines3D::wireframe(configuration, false);
     else if (type == "ZBufferedWireframe") return Lines3D::wireframe(configuration, true);
-    else return Triangles3D::zBuffer(configuration);
+    else if (type == "ZBuffering") return Triangles3D::zBuffer(configuration);
+    else if (type == "LightedZBuffering") return Light3D::lightedZBuffering(configuration);
+    return {};
 }
 
 
@@ -75,7 +78,7 @@ int main(int argc, char const* argv[]) {
                 auto end = std::chrono::high_resolution_clock::now();
                 auto time = end-start;
                 auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(time);
-                std::cout << "Time taken to generate images: " << ms.count()/1000.0 << " seconds." <<std::endl;
+                std::cout << "Time taken to generate images: " << (double) ms.count()/1000.0 << " seconds." <<std::endl;
         }
         catch(const std::bad_alloc &exception)
         {

@@ -8,7 +8,7 @@
 
 #include "../utils/ini_configuration.h"
 #include "../utils/easy_image.h"
-#include "../utils/l_parser.h"
+#include "l_parser.h"
 #include "../CoordToPixel.h"
 
 namespace LSystem2D {

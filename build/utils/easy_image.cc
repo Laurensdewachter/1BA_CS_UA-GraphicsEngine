@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <math.h>
 #include <iostream>
+#include "Figure.h"
 
 #ifndef le32toh
 #define le32toh(x) (x)
@@ -375,8 +376,19 @@ void img::EasyImage::draw_zbuf_line(ZBuffer &buffer, unsigned int x0, unsigned i
         }
     }
 }
-void img::EasyImage::draw_zbuf_triag(ZBuffer &buffer, const Vector3D &a, const Vector3D &b, const Vector3D &c, double d,
-                                     double dx, double dy, const Color &color) {
+void img::EasyImage::draw_zbuf_triag(ZBuffer &buffer, const Vector3D &a, const Vector3D &b, const Vector3D &c, double d, double dx, double dy,
+                                     const Color &ambientReflection, const Color &diffuseReflection, const Color &specularReflection,
+                                     double reflectionCoeff, Lights3D &lights) {
+    double red = 0;
+    double green = 0;
+    double blue = 0;
+    for (auto &l : lights) {
+        red += l.ambientLight.red * ambientReflection.red;
+        green += l.ambientLight.green * ambientReflection.green;
+        blue += l.ambientLight.blue * ambientReflection.blue;
+    }
+    img::Color color(red, green, blue);
+
     double xa = ((d*a.x)/(-a.z))+dx;
     double ya = ((d*a.y)/(-a.z))+dy;
     double xb = ((d*b.x)/(-b.z))+dx;

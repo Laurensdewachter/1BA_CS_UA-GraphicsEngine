@@ -20,8 +20,12 @@
 #include <stdint.h>
 #include <vector>
 #include <iostream>
+#include <list>
 #include "ZBuffer.h"
 #include "vector3d.h"
+
+struct Light;
+using Lights3D = std::list<Light>;
 /**
  * \brief The namespace of the EasyImage class
  */
@@ -242,7 +246,8 @@ namespace img
              /**
               * \brief Draws a triangle using a Z-Buffer
               */
-             void draw_zbuf_triag(ZBuffer &buffer, const Vector3D &a, const Vector3D &b, const Vector3D &c, double d, double dx, double dy, const Color &color);
+             void draw_zbuf_triag(ZBuffer &buffer, const Vector3D &a, const Vector3D &b, const Vector3D &c, double d, double dx, double dy,
+                                  const Color &ambientReflection, const Color &diffuseReflection, const Color &specularReflection, double reflectionCoeff, Lights3D &lights);
 
 		private:
 			friend std::istream& operator>>(std::istream& in, EasyImage & image);

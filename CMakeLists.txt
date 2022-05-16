@@ -16,7 +16,7 @@ set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${OWN_GXX_FLAGS}")
 ############################################################
 set(engine_sources build/utils/easy_image.cc engine.cc
         build/utils/ini_configuration.cc
-        build/utils/l_parser.cc
+        build/LSystems/l_parser.cc
         build/LSystems/2DLSystem.h
         build/utils/vector3d.cc
         build/3DLines.cpp
@@ -26,7 +26,7 @@ set(engine_sources build/utils/easy_image.cc engine.cc
         build/utils/PlatonicBodies.h
         build/utils/Figure.h
         build/utils/Transformation.cpp build/utils/Transformation.h build/utils/Utils.cpp build/utils/Utils.h
-        build/LSystems/3DLSystem.h build/LSystems/3DLSystem.cpp build/utils/ZBuffer.h build/3DTriangles.cpp build/3DTriangles.h build/utils/Clipping.cpp build/utils/Clipping.h)
+        build/LSystems/3DLSystem.h build/LSystems/3DLSystem.cpp build/utils/ZBuffer.h build/3DTriangles.cpp build/3DTriangles.h build/utils/Clipping.cpp build/utils/Clipping.h build/Light.cpp build/Light.h)
 
 ############################################################
 # Create an executable

@@ -10,7 +10,10 @@ void Utils::toPolar(const Vector3D &point, double &theta, double &phi, double &r
 
 void Utils::splitTriangles(Figure &figure) {
     Figure newFig;
-    newFig.color = figure.color;
+    newFig.ambientReflection = figure.ambientReflection;
+    newFig.diffuseReflection = figure.diffuseReflection;
+    newFig.specularReflection = figure.specularReflection;
+    newFig.reflectionCoefficient = figure.reflectionCoefficient;
     int pointCounter = 0;
 
     for (auto face : figure.faces) {

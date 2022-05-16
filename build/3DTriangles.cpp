@@ -44,6 +44,8 @@ img::EasyImage Triangles3D::zBuffer(const ini::Configuration &configuration) {
         V = Transformation::eyePointTrans(Vector3D::point(eye[0], eye[1], eye[2]));
     }
 
+    Lights3D lights = {Light(img::Color(1, 1, 1), img::Color(0, 0, 0), img::Color(0, 0, 0))};
+
     for (unsigned int i = 0; i < nrFigures; i++) {
         std::string figureName = "Figure" + std::to_string(i);
 
@@ -87,7 +89,9 @@ img::EasyImage Triangles3D::zBuffer(const ini::Configuration &configuration) {
     for (auto &curFig : figures) {
         for (auto &curFace : curFig.faces) {
             image.draw_zbuf_triag(buffer, curFig.points[curFace.point_indexes[0]], curFig.points[curFace.point_indexes[1]],
-                                  curFig.points[curFace.point_indexes[2]], d, dx, dy, curFig.color);
+                                  curFig.points[curFace.point_indexes[2]], d, dx, dy, curFig.ambientReflection,
+                                  curFig.diffuseReflection, curFig.specularReflection,
+                                  curFig.reflectionCoefficient, lights);
         }
     }
 

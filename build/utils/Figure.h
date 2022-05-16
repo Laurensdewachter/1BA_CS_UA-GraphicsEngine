@@ -16,9 +16,32 @@ struct Face {
 struct Figure {
     std::vector<Vector3D> points;
     std::vector<Face> faces;
-    img::Color color;
+    img::Color ambientReflection;
+    img::Color diffuseReflection;
+    img::Color specularReflection;
+    double reflectionCoefficient;
 };
 
 using Figures3D = std::list<Figure>;
+
+struct Light {
+    img::Color ambientLight;
+    img::Color diffuseLight;
+    img::Color specularLight;
+
+    Light() = default;
+    Light(img::Color a, img::Color d, img::Color s) : ambientLight(a), diffuseLight(d), specularLight(s) {}
+};
+
+struct InfLight : public Light {
+    Vector3D ldVector;
+};
+
+struct PointLight : public Light {
+    Vector3D location;
+    double spotAngle;
+};
+
+using Lights3D = std::list<Light>;
 
 #endif
