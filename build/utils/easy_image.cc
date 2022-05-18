@@ -206,10 +206,14 @@ img::Color const& img::EasyImage::operator()(unsigned int x, unsigned int y) con
 	return bitmap.at(x * height + y);
 }
 
-void img::EasyImage::draw_line(unsigned int x0, unsigned int y0, unsigned int x1, unsigned int y1, Color color)
+void img::EasyImage::draw_line(unsigned int x0, unsigned int y0, unsigned int x1, unsigned int y1, Color &color)
 {
 	assert(x0 < this->width && y0 < this->height);
 	assert(x1 < this->width && y1 < this->height);
+    color.red *= 255;
+    color.green *= 255;
+    color.blue *= 255;
+
 	if (x0 == x1)
 	{
 		//special case for x0 == x1
@@ -259,9 +263,13 @@ void img::EasyImage::draw_line(unsigned int x0, unsigned int y0, unsigned int x1
 	}
 }
 void img::EasyImage::draw_zbuf_line(ZBuffer &buffer, unsigned int x0, unsigned int y0, double z0,
-                                    unsigned int x1, unsigned int y1, double z1, const Color &color) {
+                                    unsigned int x1, unsigned int y1, double z1, Color &color)
+{
     assert(x0 < this->width && y0 < this->height);
     assert(x1 < this->width && y1 < this->height);
+    color.red *= 255;
+    color.green *= 255;
+    color.blue *= 255;
 
     if (x0 == x1 && y0 == y1) {
         double cur_z_value = buffer[x0][y0];
@@ -378,17 +386,8 @@ void img::EasyImage::draw_zbuf_line(ZBuffer &buffer, unsigned int x0, unsigned i
 }
 void img::EasyImage::draw_zbuf_triag(ZBuffer &buffer, const Vector3D &a, const Vector3D &b, const Vector3D &c, double d, double dx, double dy,
                                      const Color &ambientReflection, const Color &diffuseReflection, const Color &specularReflection,
-                                     double reflectionCoeff, Lights3D &lights) {
-    double red = 0;
-    double green = 0;
-    double blue = 0;
-    for (auto &l : lights) {
-        red += l.ambientLight.red * ambientReflection.red;
-        green += l.ambientLight.green * ambientReflection.green;
-        blue += l.ambientLight.blue * ambientReflection.blue;
-    }
-    img::Color color(red, green, blue);
-
+                                     double reflectionCoeff, Lights3D &lights)
+{
     double xa = ((d*a.x)/(-a.z))+dx;
     double ya = ((d*a.y)/(-a.z))+dy;
     double xb = ((d*b.x)/(-b.z))+dx;
@@ -399,8 +398,8 @@ void img::EasyImage::draw_zbuf_triag(ZBuffer &buffer, const Vector3D &a, const V
     double yMinTemp = std::min(ya, yb);
     double yMaxTemp = std::max(ya, yb);
 
-    int yMin = lround(std::min(yMinTemp, yc) + 0.5);
-    int yMax = lround(std::max(yMaxTemp, yc) - 0.5);
+    int yMin = (int) lround(std::min(yMinTemp, yc) + 0.5);
+    int yMax = (int) lround(std::max(yMaxTemp, yc) - 0.5);
 
     for (int yi = yMin; yi <= yMax; yi++) {
         double xlAB = std::numeric_limits<double>::infinity();
@@ -440,8 +439,8 @@ void img::EasyImage::draw_zbuf_triag(ZBuffer &buffer, const Vector3D &a, const V
 
         double left = std::min(xlAB, xlAC);
         double right = std::max(xrAB, xrAC);
-        int xl = lround(std::min(left, xlBC)+0.5);
-        int xr = lround(std::max(right, xrBC)-0.5);
+        int xl = (int) lround(std::min(left, xlBC)+0.5);
+        int xr = (int) lround(std::max(right, xrBC)-0.5);
 
         double xg = (xa+xb+xc)/3;
         double yg = (ya+yb+yc)/3;
@@ -456,12 +455,46 @@ void img::EasyImage::draw_zbuf_triag(ZBuffer &buffer, const Vector3D &a, const V
         double dzdx = w1/(-d*k);
         double dzdy = w2/(-d*k);
 
+        double red = 0;
+        double green = 0;
+        double blue = 0;
+        for (auto curLight : lights) {
+            red += curLight->ambientLight.red * ambientReflection.red;
+            green += curLight->ambientLight.green * ambientReflection.green;
+            blue += curLight->ambientLight.blue * ambientReflection.blue;
+
+            if (curLight->getType() == 'L') continue;
+
+            Vector3D n = Vector3D::vector(w1, w2, w3);
+            n.normalise();
+
+            if (curLight->getType() == 'I') {
+                auto infLight = (InfLight*) curLight;
+                Vector3D l = infLight->ldVector;
+
+                l.normalise();
+                l = -l;
+
+                double dot = l.dot(n);
+                if (dot >= 0) {
+                    red += curLight->diffuseLight.red * diffuseReflection.red * dot;
+                    green += curLight->diffuseLight.green * diffuseReflection.green * dot;
+                    blue += curLight->diffuseLight.blue * diffuseReflection.blue * dot;
+                }
+                continue;
+            }/* else if (curLight->getType() == 'P') {
+                        auto pointLight = (PointLight*) curLight;
+                        Vector3D* location = &pointLight->location;
+                        double spotAngle = pointLight->spotAngle;
+                    }*/
+        }
+
         for (int i = xl; i <= xr; i++) {
             double cur_z_value = buffer[i][yi];
             double new_z_value = 1.0001*one_over_zg + (i-xg)*(dzdx) + (yi-yg)*(dzdy);
 
             if (new_z_value < cur_z_value) {
-                (*this)(i, yi) = color;
+                (*this)(i, yi) = img::Color(red, green, blue);
                 buffer[i][yi] = new_z_value;
             }
         }

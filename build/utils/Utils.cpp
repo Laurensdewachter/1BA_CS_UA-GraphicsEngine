@@ -122,24 +122,24 @@ Figures3D Utils::generateFractal(Figure &fig, const unsigned int nrIterations, c
 }
 
 Figures3D Utils::generateMengerSponge(Figure &fig, unsigned int nrIterations) {
+    fig.points.push_back(Vector3D::point(0, -1, 1));
+    fig.points.push_back(Vector3D::point(0, -1, -1));
+    fig.points.push_back(Vector3D::point(0, 1, 1));
+    fig.points.push_back(Vector3D::point(0, 1, -1));
+    fig.points.push_back(Vector3D::point(-1, 0, 1));
+    fig.points.push_back(Vector3D::point(-1, 0, -1));
+    fig.points.push_back(Vector3D::point(1, 0, 1));
+    fig.points.push_back(Vector3D::point(1, 0, -1));
+    fig.points.push_back(Vector3D::point(-1, -1, 0));
+    fig.points.push_back(Vector3D::point(1, -1, 0));
+    fig.points.push_back(Vector3D::point(-1, 1, 0));
+    fig.points.push_back(Vector3D::point(1, 1, 0));
     std::vector<Figure> toConvert = {fig};
     std::vector<Figure> newFigs;
 
     for (unsigned int it = 0; it < nrIterations; it++) {
         newFigs.clear();
         for (auto & curFig : toConvert) {
-            curFig.points.push_back(Vector3D::point(0, -1, 1));
-            curFig.points.push_back(Vector3D::point(0, -1, -1));
-            curFig.points.push_back(Vector3D::point(0, 1, 1));
-            curFig.points.push_back(Vector3D::point(0, 1, -1));
-            curFig.points.push_back(Vector3D::point(-1, 0, 1));
-            curFig.points.push_back(Vector3D::point(-1, 0, -1));
-            curFig.points.push_back(Vector3D::point(1, 0, 1));
-            curFig.points.push_back(Vector3D::point(1, 0, -1));
-            curFig.points.push_back(Vector3D::point(-1, -1, 0));
-            curFig.points.push_back(Vector3D::point(1, -1, 0));
-            curFig.points.push_back(Vector3D::point(-1, 1, 0));
-            curFig.points.push_back(Vector3D::point(1, 1, 0));
             for (unsigned int pointIndex = 0; pointIndex < curFig.points.size(); pointIndex++) {
                 Vector3D curPoint = curFig.points[pointIndex];
 

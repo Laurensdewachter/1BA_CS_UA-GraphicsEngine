@@ -25,7 +25,7 @@
 #include "vector3d.h"
 
 struct Light;
-using Lights3D = std::list<Light>;
+using Lights3D = std::list<Light*>;
 /**
  * \brief The namespace of the EasyImage class
  */
@@ -224,7 +224,7 @@ namespace img
 			 * 	assert(x1 < getWidth())
 			 * 	assert(y1 < getHeight())
 			 */
-			void draw_line(unsigned int x0, unsigned int y0, unsigned int x1, unsigned int y1, Color color);
+			void draw_line(unsigned int x0, unsigned int y0, unsigned int x1, unsigned int y1, Color &color);
 
             /**
              * \brief Draws a line from pixel (x0,y0) to pixel (x1,y1) using a Z-Buffer
@@ -241,7 +241,7 @@ namespace img
 			 * 	assert(y1 < getHeight())
              */
              void draw_zbuf_line(ZBuffer &buffer, unsigned int x0, unsigned int y0, double z0,
-                                 unsigned int x1, unsigned int y1, double z1, const Color &color);
+                                 unsigned int x1, unsigned int y1, double z1, Color &color);
 
              /**
               * \brief Draws a triangle using a Z-Buffer

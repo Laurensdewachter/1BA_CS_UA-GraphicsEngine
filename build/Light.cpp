@@ -2,7 +2,6 @@
 #include "utils/Figure.h"
 #include "utils/Transformation.h"
 #include "3DLines.h"
-#include "LSystems/3DLSystem.h"
 #include "utils/Utils.h"
 #include "utils/Clipping.h"
 
@@ -49,12 +48,49 @@ img::EasyImage Light3D::lightedZBuffering(const ini::Configuration &configuratio
     Lights3D lights;
     for (unsigned int i = 0; i < nrLight; i++) {
         std::string lightName = "Light" + std::to_string(i);
+
         std::vector<double> ambientLight = configuration[lightName]["ambientLight"].as_double_tuple_or_die();
+        std::vector<double> diffuseLight;
 
-        Light newLight;
-        newLight.ambientLight = img::Color(ambientLight[0], ambientLight[1], ambientLight[2]);
+        if (configuration[lightName]["diffuseLight"].as_double_tuple_if_exists(diffuseLight)) {
+            bool inf = configuration[lightName]["infinity"].as_bool_or_die();
 
-        lights.push_back(newLight);
+            if (inf) {
+                auto* newLight = new InfLight();
+
+                const std::vector<double> direction = configuration[lightName]["direction"].as_double_tuple_or_die();
+
+                newLight->ambientLight = img::Color(ambientLight[0], ambientLight[1],
+                                                   ambientLight[2]);
+                newLight->diffuseLight = img::Color(diffuseLight[0], diffuseLight[1],
+                                                   diffuseLight[2]);
+
+                Vector3D ld = Vector3D::vector(direction[0], direction[1], direction[2]);
+                ld *= V;
+                newLight->ldVector = ld;
+
+                lights.push_back(newLight);
+            } else {
+                auto newLight = new PointLight();
+
+                const std::vector<double> location = configuration[lightName]["direction"].as_double_tuple_or_die();
+                double spotAngle;
+
+                if (configuration[lightName]["spotAngle"].as_double_if_exists(spotAngle)) newLight->spotAngle = spotAngle;
+                newLight->ambientLight = img::Color(ambientLight[0], ambientLight[1], ambientLight[2]);
+                newLight->diffuseLight = img::Color(diffuseLight[0], diffuseLight[1], diffuseLight[2]);
+                newLight->location = Vector3D::vector(location[0], location[1], location[2]);
+
+                lights.push_back(newLight);
+            }
+        } else {
+            auto newLight = new Light();
+            newLight->ambientLight = img::Color(ambientLight[0], ambientLight[1], ambientLight[2]);
+            lights.push_back(newLight);
+        }
+
+
+
     }
 
     for (unsigned int i = 0; i < nrFigures; i++) {

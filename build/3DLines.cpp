@@ -111,8 +111,11 @@ Figure createCube(const ini::Configuration &configuration, std::string &figureNa
     const double scale = configuration[figureName]["scale"].as_double_or_die();
     std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
     std::vector<double> ambientReflection;
-    if (light) ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    if (light) {
+        ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
+    std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
 
     Matrix S = Transformation::scaleFigure(scale);
     Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
@@ -124,8 +127,8 @@ Figure createCube(const ini::Configuration &configuration, std::string &figureNa
 
     Figure fig = PlatonicBodies::getCubeFigure();
 
-    img::Color ambientReflectionElement(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
-    fig.ambientReflection = ambientReflectionElement;
+    fig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
+    fig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
 
     Transformation::applyTransformation(fig, F);
 
@@ -139,8 +142,11 @@ Figures3D createFractalCube(const ini::Configuration &configuration, std::string
     const double scale = configuration[figureName]["scale"].as_double_or_die();
     std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
     std::vector<double> ambientReflection;
-    if (light) ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    if (light) {
+        ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
+    std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
     const unsigned int nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
     const double fractalScale = configuration[figureName]["fractalScale"].as_double_or_die();
 
@@ -158,9 +164,9 @@ Figures3D createFractalCube(const ini::Configuration &configuration, std::string
     if (nrIterations > 0) fractalFigs = Utils::generateFractal(fig, nrIterations, fractalScale);
     else fractalFigs.push_back(fig);
 
-    img::Color ambientReflectionElement(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
     for (auto &curFig : fractalFigs) {
-        curFig.ambientReflection = ambientReflectionElement;
+        curFig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
+        curFig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
         Transformation::applyTransformation(curFig, F);
     }
 
@@ -174,8 +180,11 @@ Figure createTetrahedron(const ini::Configuration &configuration, std::string &f
     const double scale = configuration[figureName]["scale"].as_double_or_die();
     std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
     std::vector<double> ambientReflection;
-    if (light) ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    if (light) {
+        ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
+    std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
 
     Matrix S = Transformation::scaleFigure(scale);
     Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
@@ -187,8 +196,8 @@ Figure createTetrahedron(const ini::Configuration &configuration, std::string &f
 
     Figure fig = PlatonicBodies::getTetrahedronFigure();
 
-    img::Color ambientReflectionElement(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
-    fig.ambientReflection = ambientReflectionElement;
+    fig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
+    fig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
 
     Transformation::applyTransformation(fig, F);
 
@@ -202,8 +211,11 @@ Figures3D createFractalTetrahedron(const ini::Configuration &configuration, std:
     const double scale = configuration[figureName]["scale"].as_double_or_die();
     std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
     std::vector<double> ambientReflection;
-    if (light) ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    if (light) {
+        ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
+    std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
     const unsigned int nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
     const double fractalScale = configuration[figureName]["fractalScale"].as_double_or_die();
 
@@ -221,9 +233,9 @@ Figures3D createFractalTetrahedron(const ini::Configuration &configuration, std:
     if (nrIterations > 0) fractalFigs = Utils::generateFractal(fig, nrIterations, fractalScale);
     else fractalFigs.push_back(fig);
 
-    img::Color ambientReflectionElement(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
     for (auto &curFig : fractalFigs) {
-        curFig.ambientReflection = ambientReflectionElement;
+        curFig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
+        curFig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
         Transformation::applyTransformation(curFig, F);
     }
 
@@ -237,8 +249,11 @@ Figure createOctahedron(const ini::Configuration &configuration, std::string &fi
     const double scale = configuration[figureName]["scale"].as_double_or_die();
     std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
     std::vector<double> ambientReflection;
-    if (light) ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    if (light) {
+        ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
+    std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
 
     Matrix S = Transformation::scaleFigure(scale);
     Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
@@ -250,8 +265,8 @@ Figure createOctahedron(const ini::Configuration &configuration, std::string &fi
 
     Figure fig = PlatonicBodies::getOctahedronFigure();
 
-    img::Color ambientReflectionElement(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
-    fig.ambientReflection = ambientReflectionElement;
+    fig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
+    fig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
 
     Transformation::applyTransformation(fig, F);
 
@@ -265,8 +280,11 @@ Figures3D createFractalOctahedron(const ini::Configuration &configuration, std::
     const double scale = configuration[figureName]["scale"].as_double_or_die();
     std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
     std::vector<double> ambientReflection;
-    if (light) ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    if (light) {
+        ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
+    std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
     const unsigned int nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
     const double fractalScale = configuration[figureName]["fractalScale"].as_double_or_die();
 
@@ -284,9 +302,9 @@ Figures3D createFractalOctahedron(const ini::Configuration &configuration, std::
     if (nrIterations > 0) fractalFigs = Utils::generateFractal(fig, nrIterations, fractalScale);
     else fractalFigs.push_back(fig);
 
-    img::Color ambientReflectionElement(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
     for (auto &curFig : fractalFigs) {
-        curFig.ambientReflection = ambientReflectionElement;
+        curFig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
+        curFig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
         Transformation::applyTransformation(curFig, F);
     }
 
@@ -300,8 +318,11 @@ Figure createIcosahedron(const ini::Configuration &configuration, std::string &f
     const double scale = configuration[figureName]["scale"].as_double_or_die();
     std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
     std::vector<double> ambientReflection;
-    if (light) ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    if (light) {
+        ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
+    std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
 
     Matrix S = Transformation::scaleFigure(scale);
     Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
@@ -313,8 +334,8 @@ Figure createIcosahedron(const ini::Configuration &configuration, std::string &f
 
     Figure fig = PlatonicBodies::getIcosahedronFigure();
 
-    img::Color ambientReflectionElement(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
-    fig.ambientReflection = ambientReflectionElement;
+    fig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
+    fig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
 
     Transformation::applyTransformation(fig, F);
 
@@ -328,8 +349,11 @@ Figures3D createFractalIcosahedron(const ini::Configuration &configuration, std:
     const double scale = configuration[figureName]["scale"].as_double_or_die();
     std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
     std::vector<double> ambientReflection;
-    if (light) ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    if (light) {
+        ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
+    std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
     const unsigned int nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
     const double fractalScale = configuration[figureName]["fractalScale"].as_double_or_die();
 
@@ -347,9 +371,9 @@ Figures3D createFractalIcosahedron(const ini::Configuration &configuration, std:
     if (nrIterations > 0) fractalFigs = Utils::generateFractal(fig, nrIterations, fractalScale);
     else fractalFigs.push_back(fig);
 
-    img::Color ambientReflectionElement(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
     for (auto &curFig : fractalFigs) {
-        curFig.ambientReflection = ambientReflectionElement;
+        curFig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
+        curFig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
         Transformation::applyTransformation(curFig, F);
     }
 
@@ -363,8 +387,11 @@ Figure createDodecahedron(const ini::Configuration &configuration, std::string &
     const double scale = configuration[figureName]["scale"].as_double_or_die();
     std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
     std::vector<double> ambientReflection;
-    if (light) ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    if (light) {
+        ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
+    std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
 
     Matrix S = Transformation::scaleFigure(scale);
     Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
@@ -376,8 +403,8 @@ Figure createDodecahedron(const ini::Configuration &configuration, std::string &
 
     Figure fig = PlatonicBodies::getDodecahedronFigure();
 
-    img::Color ambientReflectionElement(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
-    fig.ambientReflection = ambientReflectionElement;
+    fig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
+    fig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
 
     Transformation::applyTransformation(fig, F);
 
@@ -391,8 +418,11 @@ Figures3D createFractalDodecahedron(const ini::Configuration &configuration, std
     const double scale = configuration[figureName]["scale"].as_double_or_die();
     std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
     std::vector<double> ambientReflection;
-    if (light) ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    if (light) {
+        ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
+    std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
     const unsigned int nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
     const double fractalScale = configuration[figureName]["fractalScale"].as_double_or_die();
 
@@ -410,9 +440,9 @@ Figures3D createFractalDodecahedron(const ini::Configuration &configuration, std
     if (nrIterations > 0) fractalFigs = Utils::generateFractal(fig, nrIterations, fractalScale);
     else fractalFigs.push_back(fig);
 
-    img::Color ambientReflectionElement(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
     for (auto &curFig : fractalFigs) {
-        curFig.ambientReflection = ambientReflectionElement;
+        curFig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
+        curFig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
         Transformation::applyTransformation(curFig, F);
     }
 
@@ -426,8 +456,11 @@ Figure createSphere(const ini::Configuration &configuration, std::string &figure
     const double scale = configuration[figureName]["scale"].as_double_or_die();
     std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
     std::vector<double> ambientReflection;
-    if (light) ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    if (light) {
+        ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
+    std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
     const unsigned int n = configuration[figureName]["n"].as_int_or_die();
 
     Matrix S = Transformation::scaleFigure(scale);
@@ -440,8 +473,8 @@ Figure createSphere(const ini::Configuration &configuration, std::string &figure
 
     Figure fig = PlatonicBodies::getIcosahedronFigure();
 
-    img::Color ambientReflectionElement(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
-    fig.ambientReflection = ambientReflectionElement;
+    fig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
+    fig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
 
     for (unsigned int i = 0; i < n; i++) {
         Utils::splitTriangles(fig);
@@ -461,8 +494,11 @@ Figure createCone(const ini::Configuration &configuration, std::string &figureNa
     const double scale = configuration[figureName]["scale"].as_double_or_die();
     std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
     std::vector<double> ambientReflection;
-    if (light) ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    if (light) {
+        ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
+    std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
     const int n = configuration[figureName]["n"].as_int_or_die();
     const double height = configuration[figureName]["height"].as_double_or_die();
 
@@ -476,8 +512,8 @@ Figure createCone(const ini::Configuration &configuration, std::string &figureNa
 
     Figure fig;
 
-    img::Color ambientReflectionElement(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
-    fig.ambientReflection = ambientReflectionElement;
+    fig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
+    fig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
 
     for (int i = 0; i < n; i++) {
         fig.points.push_back(Vector3D::point(cos((2*M_PI*i)/n), sin((2*M_PI*i)/n), 0));
@@ -505,8 +541,11 @@ Figure createCylinder(const ini::Configuration &configuration, std::string &figu
     const double scale = configuration[figureName]["scale"].as_double_or_die();
     std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
     std::vector<double> ambientReflection;
-    if (light) ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    if (light) {
+        ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
+    std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
     const int n = configuration[figureName]["n"].as_int_or_die();
     const double height = configuration[figureName]["height"].as_double_or_die();
 
@@ -520,8 +559,8 @@ Figure createCylinder(const ini::Configuration &configuration, std::string &figu
 
     Figure fig;
 
-    img::Color ambientReflectionElement(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
-    fig.ambientReflection = ambientReflectionElement;
+    fig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
+    fig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
 
     for (int i = 0; i < n; i++) {
         fig.points.push_back(Vector3D::point(cos((2*M_PI*i)/n), sin((2*M_PI*i)/n), 0));
@@ -539,8 +578,8 @@ Figure createCylinder(const ini::Configuration &configuration, std::string &figu
 
     Face ground;
     Face roof;
-    for (int i = n-1; i >= 0; i--) ground.point_indexes.push_back(i);
-    for (int i = (2*n)-1; i >= n; i--) roof.point_indexes.push_back(i);
+    for (int i = 0; i <= n-1; i++) ground.point_indexes.push_back(i);
+    for (int i = n; i <= (2*n)-1; i++) roof.point_indexes.push_back(i);
     fig.faces.push_back(ground);
     fig.faces.push_back(roof);
 
@@ -556,8 +595,11 @@ Figure createTorus(const ini::Configuration &configuration, std::string &figureN
     const double scale = configuration[figureName]["scale"].as_double_or_die();
     std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
     std::vector<double> ambientReflection;
-    if (light) ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    if (light) {
+        ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
+    std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
     const int n = configuration[figureName]["n"].as_int_or_die();
     const int m = configuration[figureName]["m"].as_int_or_die();
     const double R = configuration[figureName]["R"].as_double_or_die();
@@ -573,8 +615,8 @@ Figure createTorus(const ini::Configuration &configuration, std::string &figureN
 
     Figure fig;
 
-    img::Color ambientReflectionElement(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
-    fig.ambientReflection = ambientReflectionElement;
+    fig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
+    fig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
 
     std::vector<std::vector<int>> pointTracker(n, std::vector<int>(m, 0));
     int loopCounter = 0;
@@ -608,8 +650,11 @@ Figure createBuckyBall(const ini::Configuration &configuration, std::string &fig
     const double scale = configuration[figureName]["scale"].as_double_or_die();
     std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
     std::vector<double> ambientReflection;
-    if (light) ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    if (light) {
+        ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
+    std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
 
     Matrix S = Transformation::scaleFigure(scale);
     Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
@@ -621,8 +666,8 @@ Figure createBuckyBall(const ini::Configuration &configuration, std::string &fig
 
     Figure fig = PlatonicBodies::getBuckyBall();
 
-    img::Color ambientReflectionElement(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
-    fig.ambientReflection = ambientReflectionElement;
+    fig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
+    fig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
 
     Transformation::applyTransformation(fig, F);
 
@@ -636,8 +681,11 @@ Figures3D createFractalBuckyBall(const ini::Configuration &configuration, std::s
     const double scale = configuration[figureName]["scale"].as_double_or_die();
     std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
     std::vector<double> ambientReflection;
-    if (light) ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    if (light) {
+        ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
+    std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
     const unsigned int nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
     const double fractalScale = configuration[figureName]["fractalScale"].as_double_or_die();
 
@@ -655,9 +703,9 @@ Figures3D createFractalBuckyBall(const ini::Configuration &configuration, std::s
     if (nrIterations > 0) fractalFigs = Utils::generateFractal(fig, nrIterations, fractalScale);
     else fractalFigs.push_back(fig);
 
-    img::Color ambientReflectionElement(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
     for (auto &curFig : fractalFigs) {
-        curFig.ambientReflection = ambientReflectionElement;
+        curFig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
+        curFig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
         Transformation::applyTransformation(curFig, F);
     }
 
@@ -671,8 +719,11 @@ Figures3D createMengerSponge(const ini::Configuration &configuration, std::strin
     const double scale = configuration[figureName]["scale"].as_double_or_die();
     std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
     std::vector<double> ambientReflection;
-    if (light) ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    if (light) {
+        ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
+    std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
     unsigned int nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
 
     Matrix S = Transformation::scaleFigure(scale);
@@ -689,9 +740,9 @@ Figures3D createMengerSponge(const ini::Configuration &configuration, std::strin
     if (nrIterations > 0) fractalFigs = Utils::generateMengerSponge(fig, nrIterations);
     else fractalFigs.push_back(fig);
 
-    img::Color ambientReflectionElement(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
     for (auto &curFig : fractalFigs) {
-        curFig.ambientReflection = ambientReflectionElement;
+        curFig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
+        curFig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
         Transformation::applyTransformation(curFig, F);
     }
 
@@ -703,7 +754,6 @@ img::EasyImage Lines3D::wireframe(const ini::Configuration &configuration, bool 
 
     const unsigned int size = configuration["General"]["size"].as_int_or_die();
     std::vector<double> backgroundColor = configuration["General"]["backgroundcolor"].as_double_tuple_or_die();
-    img::Color backgroundColorElement(backgroundColor[0]*255, backgroundColor[1]*255, backgroundColor[2]*255);
     const unsigned int nrFigures = configuration["General"]["nrFigures"].as_int_or_die();
     std::vector<double> eye = configuration["General"]["eye"].as_double_tuple_or_die();
 
@@ -742,8 +792,8 @@ img::EasyImage Lines3D::wireframe(const ini::Configuration &configuration, bool 
     Lines2D lines = doProjection(figures);
 
     if (zBuffer) {
-        return coordToPixel(lines, size, backgroundColorElement, true);
+        return coordToPixel(lines, size, img::Color(backgroundColor[0]*255, backgroundColor[1]*255, backgroundColor[2]*255), true);
     } else {
-        return coordToPixel(lines, size, backgroundColorElement);
+        return coordToPixel(lines, size, img::Color(backgroundColor[0]*255, backgroundColor[1]*255, backgroundColor[2]*255));
     }
 }

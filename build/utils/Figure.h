@@ -10,7 +10,7 @@
 struct Face {
     std::vector<int> point_indexes;
     Face() = default;
-    explicit Face(std::vector<int> i) : point_indexes(std::move(i)) {}
+    explicit Face(std::vector<int> i);
 };
 
 struct Figure {
@@ -30,18 +30,24 @@ struct Light {
     img::Color specularLight;
 
     Light() = default;
-    Light(img::Color a, img::Color d, img::Color s) : ambientLight(a), diffuseLight(d), specularLight(s) {}
+    Light(const img::Color &a, const img::Color &d, const img::Color &s);
+
+    virtual char getType() const;
 };
 
 struct InfLight : public Light {
     Vector3D ldVector;
+
+    char getType() const override;
 };
 
 struct PointLight : public Light {
     Vector3D location;
     double spotAngle;
+
+    char getType() const override;
 };
 
-using Lights3D = std::list<Light>;
+using Lights3D = std::list<Light*>;
 
 #endif
