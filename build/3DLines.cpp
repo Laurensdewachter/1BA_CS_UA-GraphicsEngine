@@ -406,7 +406,6 @@ Figures3D createFractalIcosahedron(const ini::Configuration &configuration, std:
         curFig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
         curFig.reflectionCoefficient = reflectionCoefficient;
         Transformation::applyTransformation(curFig, F);
-        Transformation::applyTransformation(curFig, F);
     }
 
     return fractalFigs;

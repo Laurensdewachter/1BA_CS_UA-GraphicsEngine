@@ -51,7 +51,7 @@ img::EasyImage Light3D::lightedZBuffering(const ini::Configuration &configuratio
 
         std::vector<double> ambientLight = configuration[lightName]["ambientLight"].as_double_tuple_or_die();
         std::vector<double> diffuseLight;
-        std::vector<double> specularLight;
+        std::vector<double> specularLight = configuration[lightName]["ambientLight"].as_double_tuple_or_default({0, 0, 0});
 
         if (configuration[lightName]["diffuseLight"].as_double_tuple_if_exists(diffuseLight)) {
             bool inf = configuration[lightName]["infinity"].as_bool_or_die();
@@ -64,9 +64,7 @@ img::EasyImage Light3D::lightedZBuffering(const ini::Configuration &configuratio
 
                 newLight->ambientLight = CustomColor(ambientLight[0], ambientLight[1], ambientLight[2]);
                 newLight->diffuseLight = CustomColor(diffuseLight[0], diffuseLight[1], diffuseLight[2]);
-                if (configuration[lightName]["specularLight"].as_double_tuple_if_exists(specularLight)) {
-                    newLight->specularLight = CustomColor(specularLight[0], specularLight[1], specularLight[2]);
-                }
+                newLight->specularLight = CustomColor(specularLight[0], specularLight[1], specularLight[2]);
 
                 lights.push_back(newLight);
             } else {
@@ -78,9 +76,7 @@ img::EasyImage Light3D::lightedZBuffering(const ini::Configuration &configuratio
 
                 newLight->ambientLight = CustomColor(ambientLight[0], ambientLight[1], ambientLight[2]);
                 newLight->diffuseLight = CustomColor(diffuseLight[0], diffuseLight[1], diffuseLight[2]);
-                if (configuration[lightName]["specularLight"].as_double_tuple_if_exists(specularLight)) {
-                    newLight->specularLight = CustomColor(specularLight[0], specularLight[1], specularLight[2]);
-                }
+                newLight->specularLight = CustomColor(specularLight[0], specularLight[1], specularLight[2]);
 
                 lights.push_back(newLight);
             }

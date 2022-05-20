@@ -471,6 +471,7 @@ void img::EasyImage::draw_zbuf_triag(ZBuffer &buffer, const Vector3D &a, const V
 
             if (curLight->getType() == 'I') {
                 Vector3D n = Vector3D::vector(w1, w2, w3);
+                if (k > 0) n = -n;
                 n.normalise();
 
                 auto infLight = (InfLight*) curLight;
@@ -480,7 +481,7 @@ void img::EasyImage::draw_zbuf_triag(ZBuffer &buffer, const Vector3D &a, const V
                 l = -l;
 
                 double dot = l.dot(n);
-                if (dot >= 0 && k < 0) {
+                if (dot >= 0) {
                     color.red += curLight->diffuseLight.red * diffuseReflection.red * dot;
                     color.green += curLight->diffuseLight.green * diffuseReflection.green * dot;
                     color.blue += curLight->diffuseLight.blue * diffuseReflection.blue * dot;
@@ -508,6 +509,7 @@ void img::EasyImage::draw_zbuf_triag(ZBuffer &buffer, const Vector3D &a, const V
                     double spotAngle = pointLight->spotAngle*M_PI/180.0;
 
                     Vector3D n = Vector3D::vector(w1, w2, w3);
+                    if (k > 0) n = -n;
                     n.normalise();
 
                     double z = 1.0/new_z_value;
@@ -527,7 +529,6 @@ void img::EasyImage::draw_zbuf_triag(ZBuffer &buffer, const Vector3D &a, const V
                         if (secondColor.green > 1) secondColor.green = 1;
                         if (secondColor.blue > 1) secondColor.blue = 1;
                     }
-                    /*
                     if (curLight->specularLight.red != 0 || curLight->specularLight.green != 0 || curLight->specularLight.blue != 0) {
                         Vector3D p = Vector3D::vector(-x, -y, -z);
                         p.normalise();
@@ -535,14 +536,16 @@ void img::EasyImage::draw_zbuf_triag(ZBuffer &buffer, const Vector3D &a, const V
                         Vector3D r = 2 * n * dot - l;
 
                         double beta = p.dot(r);
-                        secondColor.red += curLight->diffuseLight.red * diffuseReflection.red * std::pow(beta, reflectionCoeff);
-                        secondColor.green += curLight->diffuseLight.green * diffuseReflection.green * std::pow(beta, reflectionCoeff);
-                        secondColor.blue += curLight->diffuseLight.blue * diffuseReflection.blue * std::pow(beta, reflectionCoeff);
-                        if (secondColor.red > 1) secondColor.red = 1;
-                        if (secondColor.green > 1) secondColor.green = 1;
-                        if (secondColor.blue > 1) secondColor.blue = 1;
+                        if (beta > 0) {
+                            secondColor.red += curLight->diffuseLight.red * diffuseReflection.red * std::pow(beta, reflectionCoeff);
+                            secondColor.green += curLight->diffuseLight.green * diffuseReflection.green * std::pow(beta, reflectionCoeff);
+                            secondColor.blue += curLight->diffuseLight.blue * diffuseReflection.blue * std::pow(beta, reflectionCoeff);
+
+                            if (secondColor.red > 1) secondColor.red = 1;
+                            if (secondColor.green > 1) secondColor.green = 1;
+                            if (secondColor.blue > 1) secondColor.blue = 1;
+                        }
                     }
-                     */
                 }
 
                 img::Color finalColor(secondColor.red * 255, secondColor.green * 255, secondColor.blue * 255);
