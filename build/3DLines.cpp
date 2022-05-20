@@ -171,9 +171,9 @@ Figures3D createFractalCube(const ini::Configuration &configuration, std::string
 
     for (auto &curFig : fractalFigs) {
         curFig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
-        fig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
-        fig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
-        fig.reflectionCoefficient = reflectionCoefficient;
+        curFig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+        curFig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+        curFig.reflectionCoefficient = reflectionCoefficient;
         Transformation::applyTransformation(curFig, F);
     }
 
@@ -248,9 +248,9 @@ Figures3D createFractalTetrahedron(const ini::Configuration &configuration, std:
 
     for (auto &curFig : fractalFigs) {
         curFig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
-        fig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
-        fig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
-        fig.reflectionCoefficient = reflectionCoefficient;
+        curFig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+        curFig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+        curFig.reflectionCoefficient = reflectionCoefficient;
         Transformation::applyTransformation(curFig, F);
     }
 
@@ -325,9 +325,9 @@ Figures3D createFractalOctahedron(const ini::Configuration &configuration, std::
 
     for (auto &curFig : fractalFigs) {
         curFig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
-        fig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
-        fig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
-        fig.reflectionCoefficient = reflectionCoefficient;
+        curFig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+        curFig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+        curFig.reflectionCoefficient = reflectionCoefficient;
         Transformation::applyTransformation(curFig, F);
     }
 
@@ -402,9 +402,10 @@ Figures3D createFractalIcosahedron(const ini::Configuration &configuration, std:
 
     for (auto &curFig : fractalFigs) {
         curFig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
-        fig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
-        fig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
-        fig.reflectionCoefficient = reflectionCoefficient;
+        curFig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+        curFig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+        curFig.reflectionCoefficient = reflectionCoefficient;
+        Transformation::applyTransformation(curFig, F);
         Transformation::applyTransformation(curFig, F);
     }
 
@@ -479,9 +480,9 @@ Figures3D createFractalDodecahedron(const ini::Configuration &configuration, std
 
     for (auto &curFig : fractalFigs) {
         curFig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
-        fig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
-        fig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
-        fig.reflectionCoefficient = reflectionCoefficient;
+        curFig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+        curFig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+        curFig.reflectionCoefficient = reflectionCoefficient;
         Transformation::applyTransformation(curFig, F);
     }
 
@@ -766,9 +767,9 @@ Figures3D createFractalBuckyBall(const ini::Configuration &configuration, std::s
 
     for (auto &curFig : fractalFigs) {
         curFig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
-        fig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
-        fig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
-        fig.reflectionCoefficient = reflectionCoefficient;
+        curFig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+        curFig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+        curFig.reflectionCoefficient = reflectionCoefficient;
         Transformation::applyTransformation(curFig, F);
     }
 
@@ -807,9 +808,9 @@ Figures3D createMengerSponge(const ini::Configuration &configuration, std::strin
 
     for (auto &curFig : fractalFigs) {
         curFig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
-        fig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
-        fig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
-        fig.reflectionCoefficient = reflectionCoefficient;
+        curFig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+        curFig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+        curFig.reflectionCoefficient = reflectionCoefficient;
         Transformation::applyTransformation(curFig, F);
     }
 

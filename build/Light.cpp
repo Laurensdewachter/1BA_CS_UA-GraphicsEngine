@@ -73,7 +73,7 @@ img::EasyImage Light3D::lightedZBuffering(const ini::Configuration &configuratio
                 auto newLight = new PointLight();
 
                 const std::vector<double> location = configuration[lightName]["location"].as_double_tuple_or_die();
-                newLight->location = Vector3D::vector(location[0], location[1], location[2])*V;
+                newLight->location = Vector3D::point(location[0], location[1], location[2])*V;
                 newLight->spotAngle = configuration[lightName]["spotAngle"].as_double_or_default(90);
 
                 newLight->ambientLight = CustomColor(ambientLight[0], ambientLight[1], ambientLight[2]);

@@ -484,6 +484,7 @@ void img::EasyImage::draw_zbuf_triag(ZBuffer &buffer, const Vector3D &a, const V
                     color.red += curLight->diffuseLight.red * diffuseReflection.red * dot;
                     color.green += curLight->diffuseLight.green * diffuseReflection.green * dot;
                     color.blue += curLight->diffuseLight.blue * diffuseReflection.blue * dot;
+
                     if (color.red > 1) color.red = 1;
                     if (color.green > 1) color.green = 1;
                     if (color.blue > 1) color.blue = 1;
@@ -509,7 +510,7 @@ void img::EasyImage::draw_zbuf_triag(ZBuffer &buffer, const Vector3D &a, const V
                     Vector3D n = Vector3D::vector(w1, w2, w3);
                     n.normalise();
 
-                    double z = new_z_value;
+                    double z = 1.0/new_z_value;
                     double x = -z*(i-dx)/d;
                     double y = -z*(yi-dy)/d;
                     Vector3D l = location - Vector3D::point(x, y, z);
@@ -521,11 +522,12 @@ void img::EasyImage::draw_zbuf_triag(ZBuffer &buffer, const Vector3D &a, const V
                         secondColor.red += curLight->diffuseLight.red * diffuseReflection.red * angleValue;
                         secondColor.green += curLight->diffuseLight.green * diffuseReflection.green * angleValue;
                         secondColor.blue += curLight->diffuseLight.blue * diffuseReflection.blue * angleValue;
+
                         if (secondColor.red > 1) secondColor.red = 1;
                         if (secondColor.green > 1) secondColor.green = 1;
                         if (secondColor.blue > 1) secondColor.blue = 1;
                     }
-
+                    /*
                     if (curLight->specularLight.red != 0 || curLight->specularLight.green != 0 || curLight->specularLight.blue != 0) {
                         Vector3D p = Vector3D::vector(-x, -y, -z);
                         p.normalise();
@@ -540,6 +542,7 @@ void img::EasyImage::draw_zbuf_triag(ZBuffer &buffer, const Vector3D &a, const V
                         if (secondColor.green > 1) secondColor.green = 1;
                         if (secondColor.blue > 1) secondColor.blue = 1;
                     }
+                     */
                 }
 
                 img::Color finalColor(secondColor.red * 255, secondColor.green * 255, secondColor.blue * 255);
