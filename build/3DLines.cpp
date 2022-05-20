@@ -80,9 +80,8 @@ Figure eyeFigure(const ini::Configuration &configuration, std::string &figureNam
     Matrix F = S * rX * rY * rZ * T * V;
 
     Figure fig;
-
-    img::Color colorElement(color[0]*255, color[1]*255, color[2]*255);
-    fig.ambientReflection = colorElement;
+    
+    fig.ambientReflection = CustomColor(color[0], color[1], color[2]);
 
     for (unsigned int j = 0; j < nrPoints; j++) {
         std::string pointName = "point" + std::to_string(j);
@@ -116,6 +115,8 @@ Figure createCube(const ini::Configuration &configuration, std::string &figureNa
     }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
     std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
+    std::vector<double> specularReflection = configuration[figureName]["specularReflection"].as_double_tuple_or_default({0, 0, 0});
+    const double reflectionCoefficient = configuration[figureName]["reflectionCoefficient"].as_double_or_default(0);
 
     Matrix S = Transformation::scaleFigure(scale);
     Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
@@ -127,8 +128,10 @@ Figure createCube(const ini::Configuration &configuration, std::string &figureNa
 
     Figure fig = PlatonicBodies::getCubeFigure();
 
-    fig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
-    fig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
+    fig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
+    fig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+    fig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+    fig.reflectionCoefficient = reflectionCoefficient;
 
     Transformation::applyTransformation(fig, F);
 
@@ -147,6 +150,8 @@ Figures3D createFractalCube(const ini::Configuration &configuration, std::string
     }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
     std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
+    std::vector<double> specularReflection = configuration[figureName]["specularReflection"].as_double_tuple_or_default({0, 0, 0});
+    const double reflectionCoefficient = configuration[figureName]["reflectionCoefficient"].as_double_or_default(0);
     const unsigned int nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
     const double fractalScale = configuration[figureName]["fractalScale"].as_double_or_die();
 
@@ -165,8 +170,10 @@ Figures3D createFractalCube(const ini::Configuration &configuration, std::string
     else fractalFigs.push_back(fig);
 
     for (auto &curFig : fractalFigs) {
-        curFig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
-        curFig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
+        curFig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
+        fig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+        fig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+        fig.reflectionCoefficient = reflectionCoefficient;
         Transformation::applyTransformation(curFig, F);
     }
 
@@ -185,6 +192,8 @@ Figure createTetrahedron(const ini::Configuration &configuration, std::string &f
     }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
     std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
+    std::vector<double> specularReflection = configuration[figureName]["specularReflection"].as_double_tuple_or_default({0, 0, 0});
+    const double reflectionCoefficient = configuration[figureName]["reflectionCoefficient"].as_double_or_default(0);
 
     Matrix S = Transformation::scaleFigure(scale);
     Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
@@ -196,8 +205,10 @@ Figure createTetrahedron(const ini::Configuration &configuration, std::string &f
 
     Figure fig = PlatonicBodies::getTetrahedronFigure();
 
-    fig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
-    fig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
+    fig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
+    fig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+    fig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+    fig.reflectionCoefficient = reflectionCoefficient;
 
     Transformation::applyTransformation(fig, F);
 
@@ -216,6 +227,8 @@ Figures3D createFractalTetrahedron(const ini::Configuration &configuration, std:
     }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
     std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
+    std::vector<double> specularReflection = configuration[figureName]["specularReflection"].as_double_tuple_or_default({0, 0, 0});
+    const double reflectionCoefficient = configuration[figureName]["reflectionCoefficient"].as_double_or_default(0);
     const unsigned int nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
     const double fractalScale = configuration[figureName]["fractalScale"].as_double_or_die();
 
@@ -234,8 +247,10 @@ Figures3D createFractalTetrahedron(const ini::Configuration &configuration, std:
     else fractalFigs.push_back(fig);
 
     for (auto &curFig : fractalFigs) {
-        curFig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
-        curFig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
+        curFig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
+        fig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+        fig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+        fig.reflectionCoefficient = reflectionCoefficient;
         Transformation::applyTransformation(curFig, F);
     }
 
@@ -254,6 +269,8 @@ Figure createOctahedron(const ini::Configuration &configuration, std::string &fi
     }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
     std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
+    std::vector<double> specularReflection = configuration[figureName]["specularReflection"].as_double_tuple_or_default({0, 0, 0});
+    const double reflectionCoefficient = configuration[figureName]["reflectionCoefficient"].as_double_or_default(0);
 
     Matrix S = Transformation::scaleFigure(scale);
     Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
@@ -265,8 +282,10 @@ Figure createOctahedron(const ini::Configuration &configuration, std::string &fi
 
     Figure fig = PlatonicBodies::getOctahedronFigure();
 
-    fig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
-    fig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
+    fig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
+    fig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+    fig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+    fig.reflectionCoefficient = reflectionCoefficient;
 
     Transformation::applyTransformation(fig, F);
 
@@ -285,6 +304,8 @@ Figures3D createFractalOctahedron(const ini::Configuration &configuration, std::
     }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
     std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
+    std::vector<double> specularReflection = configuration[figureName]["specularReflection"].as_double_tuple_or_default({0, 0, 0});
+    const double reflectionCoefficient = configuration[figureName]["reflectionCoefficient"].as_double_or_default(0);
     const unsigned int nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
     const double fractalScale = configuration[figureName]["fractalScale"].as_double_or_die();
 
@@ -303,8 +324,10 @@ Figures3D createFractalOctahedron(const ini::Configuration &configuration, std::
     else fractalFigs.push_back(fig);
 
     for (auto &curFig : fractalFigs) {
-        curFig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
-        curFig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
+        curFig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
+        fig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+        fig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+        fig.reflectionCoefficient = reflectionCoefficient;
         Transformation::applyTransformation(curFig, F);
     }
 
@@ -323,6 +346,8 @@ Figure createIcosahedron(const ini::Configuration &configuration, std::string &f
     }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
     std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
+    std::vector<double> specularReflection = configuration[figureName]["specularReflection"].as_double_tuple_or_default({0, 0, 0});
+    const double reflectionCoefficient = configuration[figureName]["reflectionCoefficient"].as_double_or_default(0);
 
     Matrix S = Transformation::scaleFigure(scale);
     Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
@@ -334,8 +359,10 @@ Figure createIcosahedron(const ini::Configuration &configuration, std::string &f
 
     Figure fig = PlatonicBodies::getIcosahedronFigure();
 
-    fig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
-    fig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
+    fig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
+    fig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+    fig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+    fig.reflectionCoefficient = reflectionCoefficient;
 
     Transformation::applyTransformation(fig, F);
 
@@ -354,6 +381,8 @@ Figures3D createFractalIcosahedron(const ini::Configuration &configuration, std:
     }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
     std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
+    std::vector<double> specularReflection = configuration[figureName]["specularReflection"].as_double_tuple_or_default({0, 0, 0});
+    const double reflectionCoefficient = configuration[figureName]["reflectionCoefficient"].as_double_or_default(0);
     const unsigned int nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
     const double fractalScale = configuration[figureName]["fractalScale"].as_double_or_die();
 
@@ -372,8 +401,10 @@ Figures3D createFractalIcosahedron(const ini::Configuration &configuration, std:
     else fractalFigs.push_back(fig);
 
     for (auto &curFig : fractalFigs) {
-        curFig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
-        curFig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
+        curFig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
+        fig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+        fig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+        fig.reflectionCoefficient = reflectionCoefficient;
         Transformation::applyTransformation(curFig, F);
     }
 
@@ -392,6 +423,8 @@ Figure createDodecahedron(const ini::Configuration &configuration, std::string &
     }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
     std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
+    std::vector<double> specularReflection = configuration[figureName]["specularReflection"].as_double_tuple_or_default({0, 0, 0});
+    const double reflectionCoefficient = configuration[figureName]["reflectionCoefficient"].as_double_or_default(0);
 
     Matrix S = Transformation::scaleFigure(scale);
     Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
@@ -403,8 +436,10 @@ Figure createDodecahedron(const ini::Configuration &configuration, std::string &
 
     Figure fig = PlatonicBodies::getDodecahedronFigure();
 
-    fig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
-    fig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
+    fig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
+    fig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+    fig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+    fig.reflectionCoefficient = reflectionCoefficient;
 
     Transformation::applyTransformation(fig, F);
 
@@ -423,6 +458,8 @@ Figures3D createFractalDodecahedron(const ini::Configuration &configuration, std
     }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
     std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
+    std::vector<double> specularReflection = configuration[figureName]["specularReflection"].as_double_tuple_or_default({0, 0, 0});
+    const double reflectionCoefficient = configuration[figureName]["reflectionCoefficient"].as_double_or_default(0);
     const unsigned int nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
     const double fractalScale = configuration[figureName]["fractalScale"].as_double_or_die();
 
@@ -441,8 +478,10 @@ Figures3D createFractalDodecahedron(const ini::Configuration &configuration, std
     else fractalFigs.push_back(fig);
 
     for (auto &curFig : fractalFigs) {
-        curFig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
-        curFig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
+        curFig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
+        fig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+        fig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+        fig.reflectionCoefficient = reflectionCoefficient;
         Transformation::applyTransformation(curFig, F);
     }
 
@@ -461,6 +500,8 @@ Figure createSphere(const ini::Configuration &configuration, std::string &figure
     }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
     std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
+    std::vector<double> specularReflection = configuration[figureName]["specularReflection"].as_double_tuple_or_default({0, 0, 0});
+    const double reflectionCoefficient = configuration[figureName]["reflectionCoefficient"].as_double_or_default(0);
     const unsigned int n = configuration[figureName]["n"].as_int_or_die();
 
     Matrix S = Transformation::scaleFigure(scale);
@@ -473,8 +514,10 @@ Figure createSphere(const ini::Configuration &configuration, std::string &figure
 
     Figure fig = PlatonicBodies::getIcosahedronFigure();
 
-    fig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
-    fig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
+    fig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
+    fig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+    fig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+    fig.reflectionCoefficient = reflectionCoefficient;
 
     for (unsigned int i = 0; i < n; i++) {
         Utils::splitTriangles(fig);
@@ -499,6 +542,8 @@ Figure createCone(const ini::Configuration &configuration, std::string &figureNa
     }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
     std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
+    std::vector<double> specularReflection = configuration[figureName]["specularReflection"].as_double_tuple_or_default({0, 0, 0});
+    const double reflectionCoefficient = configuration[figureName]["reflectionCoefficient"].as_double_or_default(0);
     const int n = configuration[figureName]["n"].as_int_or_die();
     const double height = configuration[figureName]["height"].as_double_or_die();
 
@@ -512,8 +557,10 @@ Figure createCone(const ini::Configuration &configuration, std::string &figureNa
 
     Figure fig;
 
-    fig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
-    fig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
+    fig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
+    fig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+    fig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+    fig.reflectionCoefficient = reflectionCoefficient;
 
     for (int i = 0; i < n; i++) {
         fig.points.push_back(Vector3D::point(cos((2*M_PI*i)/n), sin((2*M_PI*i)/n), 0));
@@ -546,6 +593,8 @@ Figure createCylinder(const ini::Configuration &configuration, std::string &figu
     }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
     std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
+    std::vector<double> specularReflection = configuration[figureName]["specularReflection"].as_double_tuple_or_default({0, 0, 0});
+    const double reflectionCoefficient = configuration[figureName]["reflectionCoefficient"].as_double_or_default(0);
     const int n = configuration[figureName]["n"].as_int_or_die();
     const double height = configuration[figureName]["height"].as_double_or_die();
 
@@ -559,8 +608,10 @@ Figure createCylinder(const ini::Configuration &configuration, std::string &figu
 
     Figure fig;
 
-    fig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
-    fig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
+    fig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
+    fig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+    fig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+    fig.reflectionCoefficient = reflectionCoefficient;
 
     for (int i = 0; i < n; i++) {
         fig.points.push_back(Vector3D::point(cos((2*M_PI*i)/n), sin((2*M_PI*i)/n), 0));
@@ -600,6 +651,8 @@ Figure createTorus(const ini::Configuration &configuration, std::string &figureN
     }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
     std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
+    std::vector<double> specularReflection = configuration[figureName]["specularReflection"].as_double_tuple_or_default({0, 0, 0});
+    const double reflectionCoefficient = configuration[figureName]["reflectionCoefficient"].as_double_or_default(0);
     const int n = configuration[figureName]["n"].as_int_or_die();
     const int m = configuration[figureName]["m"].as_int_or_die();
     const double R = configuration[figureName]["R"].as_double_or_die();
@@ -615,8 +668,10 @@ Figure createTorus(const ini::Configuration &configuration, std::string &figureN
 
     Figure fig;
 
-    fig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
-    fig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
+    fig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
+    fig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+    fig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+    fig.reflectionCoefficient = reflectionCoefficient;
 
     std::vector<std::vector<int>> pointTracker(n, std::vector<int>(m, 0));
     int loopCounter = 0;
@@ -655,6 +710,8 @@ Figure createBuckyBall(const ini::Configuration &configuration, std::string &fig
     }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
     std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
+    std::vector<double> specularReflection = configuration[figureName]["specularReflection"].as_double_tuple_or_default({0, 0, 0});
+    const double reflectionCoefficient = configuration[figureName]["reflectionCoefficient"].as_double_or_default(0);
 
     Matrix S = Transformation::scaleFigure(scale);
     Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
@@ -666,8 +723,10 @@ Figure createBuckyBall(const ini::Configuration &configuration, std::string &fig
 
     Figure fig = PlatonicBodies::getBuckyBall();
 
-    fig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
-    fig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
+    fig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
+    fig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+    fig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+    fig.reflectionCoefficient = reflectionCoefficient;
 
     Transformation::applyTransformation(fig, F);
 
@@ -686,6 +745,8 @@ Figures3D createFractalBuckyBall(const ini::Configuration &configuration, std::s
     }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
     std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
+    std::vector<double> specularReflection = configuration[figureName]["specularReflection"].as_double_tuple_or_default({0, 0, 0});
+    const double reflectionCoefficient = configuration[figureName]["reflectionCoefficient"].as_double_or_default(0);
     const unsigned int nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
     const double fractalScale = configuration[figureName]["fractalScale"].as_double_or_die();
 
@@ -704,8 +765,10 @@ Figures3D createFractalBuckyBall(const ini::Configuration &configuration, std::s
     else fractalFigs.push_back(fig);
 
     for (auto &curFig : fractalFigs) {
-        curFig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
-        curFig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
+        curFig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
+        fig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+        fig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+        fig.reflectionCoefficient = reflectionCoefficient;
         Transformation::applyTransformation(curFig, F);
     }
 
@@ -724,6 +787,8 @@ Figures3D createMengerSponge(const ini::Configuration &configuration, std::strin
     }
     else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
     std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
+    std::vector<double> specularReflection = configuration[figureName]["specularReflection"].as_double_tuple_or_default({0, 0, 0});
+    const double reflectionCoefficient = configuration[figureName]["reflectionCoefficient"].as_double_or_default(0);
     unsigned int nrIterations = configuration[figureName]["nrIterations"].as_int_or_die();
 
     Matrix S = Transformation::scaleFigure(scale);
@@ -741,8 +806,10 @@ Figures3D createMengerSponge(const ini::Configuration &configuration, std::strin
     else fractalFigs.push_back(fig);
 
     for (auto &curFig : fractalFigs) {
-        curFig.ambientReflection = img::Color(ambientReflection[0] * 255, ambientReflection[1] * 255, ambientReflection[2] * 255);
-        curFig.diffuseReflection = img::Color(diffuseReflection[0] * 255, diffuseReflection[1] * 255, diffuseReflection[2] * 255);
+        curFig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
+        fig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+        fig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+        fig.reflectionCoefficient = reflectionCoefficient;
         Transformation::applyTransformation(curFig, F);
     }
 
@@ -792,8 +859,8 @@ img::EasyImage Lines3D::wireframe(const ini::Configuration &configuration, bool 
     Lines2D lines = doProjection(figures);
 
     if (zBuffer) {
-        return coordToPixel(lines, size, img::Color(backgroundColor[0]*255, backgroundColor[1]*255, backgroundColor[2]*255), true);
+        return coordToPixel(lines, size, img::Color(backgroundColor[0] * 255, backgroundColor[1] * 255, backgroundColor[2] * 255), true);
     } else {
-        return coordToPixel(lines, size, img::Color(backgroundColor[0]*255, backgroundColor[1]*255, backgroundColor[2]*255));
+        return coordToPixel(lines, size, img::Color(backgroundColor[0] * 255, backgroundColor[1] * 255, backgroundColor[2] * 255));
     }
 }

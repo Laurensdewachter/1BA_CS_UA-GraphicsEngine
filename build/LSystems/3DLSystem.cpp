@@ -45,8 +45,7 @@ Figure LSystem3D::LSystem3D(const ini::Configuration &configuration, const std::
 
     Figure fig;
 
-    img::Color colorElement(color[0]*255, color[1]*255, color[2]*255);
-    fig.ambientReflection = colorElement;
+    fig.ambientReflection = CustomColor(color[0], color[1], color[2]);
 
     fig.points.push_back(curPoint);
     int indexCounter = 0;

@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cmath>
 #include "utils/easy_image.h"
+#include "utils/Figure.h"
 
 
 struct Point2D {
@@ -15,7 +16,7 @@ struct Point2D {
 struct Line2D {
     Point2D p1;
     Point2D p2;
-    img::Color color;
+    CustomColor color;
 
     double z1;
     double z2;

@@ -1,4 +1,5 @@
 #include "Intro.h"
+#include "utils/Figure.h"
 
 void quarterCircle(img::EasyImage &image, std::pair<int, int> p1, std::pair<int, int> p2, const int N,
                    img::Color color) {
@@ -13,7 +14,8 @@ void quarterCircle(img::EasyImage &image, std::pair<int, int> p1, std::pair<int,
     for (int i = 0; i < N; i++) {
         const double p1y = p1.second + i * Hs;
         const double p2x = p1.first + i * Ws;
-        image.draw_line(p1.first, lround(p1y), lround(p2x), p2.second, color);
+        CustomColor c(color.red/255, color.green/255, color.blue/255);
+        image.draw_line(p1.first, lround(p1y), lround(p2x), p2.second, c);
     }
 }
 

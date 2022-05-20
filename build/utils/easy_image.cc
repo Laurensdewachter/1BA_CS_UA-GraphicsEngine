@@ -206,20 +206,19 @@ img::Color const& img::EasyImage::operator()(unsigned int x, unsigned int y) con
 	return bitmap.at(x * height + y);
 }
 
-void img::EasyImage::draw_line(unsigned int x0, unsigned int y0, unsigned int x1, unsigned int y1, Color &color)
+void img::EasyImage::draw_line(unsigned int x0, unsigned int y0, unsigned int x1, unsigned int y1, CustomColor &color)
 {
 	assert(x0 < this->width && y0 < this->height);
 	assert(x1 < this->width && y1 < this->height);
-    color.red *= 255;
-    color.green *= 255;
-    color.blue *= 255;
+
+    img::Color finalColor(color.red*255, color.green*255, color.blue*255);
 
 	if (x0 == x1)
 	{
 		//special case for x0 == x1
 		for (unsigned int i = std::min(y0, y1); i <= std::max(y0, y1); i++)
 		{
-			(*this)(x0, i) = color;
+			(*this)(x0, i) = finalColor;
 		}
 	}
 	else if (y0 == y1)
@@ -227,7 +226,7 @@ void img::EasyImage::draw_line(unsigned int x0, unsigned int y0, unsigned int x1
 		//special case for y0 == y1
 		for (unsigned int i = std::min(x0, x1); i <= std::max(x0, x1); i++)
 		{
-			(*this)(i, y0) = color;
+			(*this)(i, y0) = finalColor;
 		}
 	}
 	else
@@ -243,40 +242,39 @@ void img::EasyImage::draw_line(unsigned int x0, unsigned int y0, unsigned int x1
 		{
 			for (unsigned int i = 0; i <= (x1 - x0); i++)
 			{
-				(*this)(x0 + i, (unsigned int) round(y0 + m * i)) = color;
+				(*this)(x0 + i, (unsigned int) round(y0 + m * i)) = finalColor;
 			}
 		}
 		else if (m > 1.0)
 		{
 			for (unsigned int i = 0; i <= (y1 - y0); i++)
 			{
-				(*this)((unsigned int) round(x0 + (i / m)), y0 + i) = color;
+				(*this)((unsigned int) round(x0 + (i / m)), y0 + i) = finalColor;
 			}
 		}
 		else if (m < -1.0)
 		{
 			for (unsigned int i = 0; i <= (y0 - y1); i++)
 			{
-				(*this)((unsigned int) round(x0 - (i / m)), y0 - i) = color;
+				(*this)((unsigned int) round(x0 - (i / m)), y0 - i) = finalColor;
 			}
 		}
 	}
 }
 void img::EasyImage::draw_zbuf_line(ZBuffer &buffer, unsigned int x0, unsigned int y0, double z0,
-                                    unsigned int x1, unsigned int y1, double z1, Color &color)
+                                    unsigned int x1, unsigned int y1, double z1, CustomColor &color)
 {
     assert(x0 < this->width && y0 < this->height);
     assert(x1 < this->width && y1 < this->height);
-    color.red *= 255;
-    color.green *= 255;
-    color.blue *= 255;
+
+    img::Color finalColor(color.red*255, color.green*255, color.blue*255);
 
     if (x0 == x1 && y0 == y1) {
         double cur_z_value = buffer[x0][y0];
         double new_z_value = ((1/z0) + (1/z1))/2;
 
         if (new_z_value < cur_z_value) {
-            (*this)(x0, y0) = color;
+            (*this)(x0, y0) = finalColor;
             buffer[x0][y0] = new_z_value;
         }
     }
@@ -297,7 +295,7 @@ void img::EasyImage::draw_zbuf_line(ZBuffer &buffer, unsigned int x0, unsigned i
             k++;
 
             if (new_z_value < cur_z_value) {
-                (*this)(x0, i) = color;
+                (*this)(x0, i) = finalColor;
                 buffer[x0][i] = new_z_value;
             }
         }
@@ -319,7 +317,7 @@ void img::EasyImage::draw_zbuf_line(ZBuffer &buffer, unsigned int x0, unsigned i
             k++;
 
             if (new_z_value < cur_z_value) {
-                (*this)(i, y0) = color;
+                (*this)(i, y0) = finalColor;
                 buffer[i][y0] = new_z_value;
             }
         }
@@ -345,7 +343,7 @@ void img::EasyImage::draw_zbuf_line(ZBuffer &buffer, unsigned int x0, unsigned i
                 k++;
 
                 if (new_z_value < cur_z_value) {
-                    (*this)(x0 + i, (unsigned int) round(y0 + m * i)) = color;
+                    (*this)(x0 + i, (unsigned int) round(y0 + m * i)) = finalColor;
                     buffer[x0+i][(unsigned int) round(y0 + m * i)] = new_z_value;
                 }
             }
@@ -361,7 +359,7 @@ void img::EasyImage::draw_zbuf_line(ZBuffer &buffer, unsigned int x0, unsigned i
                 k++;
 
                 if (new_z_value < cur_z_value) {
-                    (*this)((unsigned int) round(x0 + (i / m)), y0 + i) = color;
+                    (*this)((unsigned int) round(x0 + (i / m)), y0 + i) = finalColor;
                     buffer[(unsigned int) round(x0 + (i / m))][y0 + i] = new_z_value;
                 }
             }
@@ -377,7 +375,7 @@ void img::EasyImage::draw_zbuf_line(ZBuffer &buffer, unsigned int x0, unsigned i
                 k++;
 
                 if (new_z_value < cur_z_value) {
-                    (*this)((unsigned int) round(x0 - (i / m)), y0 - i) = color;
+                    (*this)((unsigned int) round(x0 - (i / m)), y0 - i) = finalColor;
                     buffer[(unsigned int) round(x0 - (i / m))][y0 - i] = new_z_value;
                 }
             }
@@ -385,9 +383,21 @@ void img::EasyImage::draw_zbuf_line(ZBuffer &buffer, unsigned int x0, unsigned i
     }
 }
 void img::EasyImage::draw_zbuf_triag(ZBuffer &buffer, const Vector3D &a, const Vector3D &b, const Vector3D &c, double d, double dx, double dy,
-                                     const Color &ambientReflection, const Color &diffuseReflection, const Color &specularReflection,
+                                     const CustomColor &ambientReflection, const CustomColor &diffuseReflection, const CustomColor &specularReflection,
                                      double reflectionCoeff, Lights3D &lights)
 {
+    double ambientRed = 0;
+    double ambientGreen = 0;
+    double ambientBlue = 0;
+    for (auto curLight : lights) {
+        ambientRed += curLight->ambientLight.red * ambientReflection.red;
+        ambientGreen += curLight->ambientLight.green * ambientReflection.green;
+        ambientBlue += curLight->ambientLight.blue * ambientReflection.blue;
+        if (ambientRed > 1) ambientRed = 1;
+        if (ambientGreen > 1) ambientGreen = 1;
+        if (ambientBlue > 1) ambientBlue = 1;
+    }
+
     double xa = ((d*a.x)/(-a.z))+dx;
     double ya = ((d*a.y)/(-a.z))+dy;
     double xb = ((d*b.x)/(-b.z))+dx;
@@ -455,20 +465,14 @@ void img::EasyImage::draw_zbuf_triag(ZBuffer &buffer, const Vector3D &a, const V
         double dzdx = w1/(-d*k);
         double dzdy = w2/(-d*k);
 
-        double red = 0;
-        double green = 0;
-        double blue = 0;
+        CustomColor color(ambientRed, ambientGreen, ambientBlue);
         for (auto curLight : lights) {
-            red += curLight->ambientLight.red * ambientReflection.red;
-            green += curLight->ambientLight.green * ambientReflection.green;
-            blue += curLight->ambientLight.blue * ambientReflection.blue;
-
             if (curLight->getType() == 'L') continue;
 
-            Vector3D n = Vector3D::vector(w1, w2, w3);
-            n.normalise();
-
             if (curLight->getType() == 'I') {
+                Vector3D n = Vector3D::vector(w1, w2, w3);
+                n.normalise();
+
                 auto infLight = (InfLight*) curLight;
                 Vector3D l = infLight->ldVector;
 
@@ -476,17 +480,15 @@ void img::EasyImage::draw_zbuf_triag(ZBuffer &buffer, const Vector3D &a, const V
                 l = -l;
 
                 double dot = l.dot(n);
-                if (dot >= 0) {
-                    red += curLight->diffuseLight.red * diffuseReflection.red * dot;
-                    green += curLight->diffuseLight.green * diffuseReflection.green * dot;
-                    blue += curLight->diffuseLight.blue * diffuseReflection.blue * dot;
+                if (dot >= 0 && k < 0) {
+                    color.red += curLight->diffuseLight.red * diffuseReflection.red * dot;
+                    color.green += curLight->diffuseLight.green * diffuseReflection.green * dot;
+                    color.blue += curLight->diffuseLight.blue * diffuseReflection.blue * dot;
+                    if (color.red > 1) color.red = 1;
+                    if (color.green > 1) color.green = 1;
+                    if (color.blue > 1) color.blue = 1;
                 }
-                continue;
-            }/* else if (curLight->getType() == 'P') {
-                        auto pointLight = (PointLight*) curLight;
-                        Vector3D* location = &pointLight->location;
-                        double spotAngle = pointLight->spotAngle;
-                    }*/
+            }
         }
 
         for (int i = xl; i <= xr; i++) {
@@ -494,8 +496,54 @@ void img::EasyImage::draw_zbuf_triag(ZBuffer &buffer, const Vector3D &a, const V
             double new_z_value = 1.0001*one_over_zg + (i-xg)*(dzdx) + (yi-yg)*(dzdy);
 
             if (new_z_value < cur_z_value) {
-                (*this)(i, yi) = img::Color(red, green, blue);
                 buffer[i][yi] = new_z_value;
+
+                CustomColor secondColor(color);
+                for (auto curLight : lights) {
+                    if (curLight->getType() != 'P') continue;
+
+                    auto pointLight = (PointLight*) curLight;
+                    Vector3D location = pointLight->location;
+                    double spotAngle = pointLight->spotAngle*M_PI/180.0;
+
+                    Vector3D n = Vector3D::vector(w1, w2, w3);
+                    n.normalise();
+
+                    double z = new_z_value;
+                    double x = -z*(i-dx)/d;
+                    double y = -z*(yi-dy)/d;
+                    Vector3D l = location - Vector3D::point(x, y, z);
+                    l.normalise();
+
+                    double dot = l.dot(n);
+                    if (dot > cos(spotAngle) && k < 0) {
+                        double angleValue = 1 - ((1 - dot) / (1 - cos(spotAngle)));
+                        secondColor.red += curLight->diffuseLight.red * diffuseReflection.red * angleValue;
+                        secondColor.green += curLight->diffuseLight.green * diffuseReflection.green * angleValue;
+                        secondColor.blue += curLight->diffuseLight.blue * diffuseReflection.blue * angleValue;
+                        if (secondColor.red > 1) secondColor.red = 1;
+                        if (secondColor.green > 1) secondColor.green = 1;
+                        if (secondColor.blue > 1) secondColor.blue = 1;
+                    }
+
+                    if (curLight->specularLight.red != 0 || curLight->specularLight.green != 0 || curLight->specularLight.blue != 0) {
+                        Vector3D p = Vector3D::vector(-x, -y, -z);
+                        p.normalise();
+
+                        Vector3D r = 2 * n * dot - l;
+
+                        double beta = p.dot(r);
+                        secondColor.red += curLight->diffuseLight.red * diffuseReflection.red * std::pow(beta, reflectionCoeff);
+                        secondColor.green += curLight->diffuseLight.green * diffuseReflection.green * std::pow(beta, reflectionCoeff);
+                        secondColor.blue += curLight->diffuseLight.blue * diffuseReflection.blue * std::pow(beta, reflectionCoeff);
+                        if (secondColor.red > 1) secondColor.red = 1;
+                        if (secondColor.green > 1) secondColor.green = 1;
+                        if (secondColor.blue > 1) secondColor.blue = 1;
+                    }
+                }
+
+                img::Color finalColor(secondColor.red * 255, secondColor.green * 255, secondColor.blue * 255);
+                (*this)(i, yi) = finalColor;
             }
         }
     }

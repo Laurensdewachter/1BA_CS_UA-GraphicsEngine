@@ -5,7 +5,7 @@ img::EasyImage LSystem2D::LSystem2D(const ini::Configuration &configuration) {
     std::vector<double> backgroundColor = configuration["General"]["backgroundcolor"].as_double_tuple_or_die();
     img::Color BackgroundColorElement(backgroundColor[0]*255, backgroundColor[1]*255, backgroundColor[2]*255);
     std::vector<double> lineColor = configuration["2DLSystem"]["color"].as_double_tuple_or_die();
-    img::Color LineColorElement(lineColor[0]*255, lineColor[1]*255, lineColor[2]*255);
+    CustomColor LineColorElement(lineColor[0], lineColor[1], lineColor[2]);
     std::string inputfile = configuration["2DLSystem"]["inputfile"].as_string_or_die();
 
     std::string initiator;

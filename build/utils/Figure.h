@@ -7,6 +7,16 @@
 #include "vector3d.h"
 #include "easy_image.h"
 
+struct CustomColor {
+    double red;
+    double green;
+    double blue;
+
+    CustomColor() = default;
+    CustomColor(const CustomColor& c);
+    CustomColor(double r, double g, double b);
+};
+
 struct Face {
     std::vector<int> point_indexes;
     Face() = default;
@@ -16,21 +26,21 @@ struct Face {
 struct Figure {
     std::vector<Vector3D> points;
     std::vector<Face> faces;
-    img::Color ambientReflection;
-    img::Color diffuseReflection;
-    img::Color specularReflection;
+    CustomColor ambientReflection;
+    CustomColor diffuseReflection;
+    CustomColor specularReflection;
     double reflectionCoefficient;
 };
 
 using Figures3D = std::list<Figure>;
 
 struct Light {
-    img::Color ambientLight;
-    img::Color diffuseLight;
-    img::Color specularLight;
+    CustomColor ambientLight;
+    CustomColor diffuseLight;
+    CustomColor specularLight;
 
     Light() = default;
-    Light(const img::Color &a, const img::Color &d, const img::Color &s);
+    Light(const CustomColor &a, const CustomColor &d, const CustomColor &s);
 
     virtual char getType() const;
 };

@@ -24,7 +24,9 @@
 #include "ZBuffer.h"
 #include "vector3d.h"
 
+
 struct Light;
+struct CustomColor;
 using Lights3D = std::list<Light*>;
 /**
  * \brief The namespace of the EasyImage class
@@ -224,7 +226,7 @@ namespace img
 			 * 	assert(x1 < getWidth())
 			 * 	assert(y1 < getHeight())
 			 */
-			void draw_line(unsigned int x0, unsigned int y0, unsigned int x1, unsigned int y1, Color &color);
+			void draw_line(unsigned int x0, unsigned int y0, unsigned int x1, unsigned int y1, CustomColor &color);
 
             /**
              * \brief Draws a line from pixel (x0,y0) to pixel (x1,y1) using a Z-Buffer
@@ -241,13 +243,13 @@ namespace img
 			 * 	assert(y1 < getHeight())
              */
              void draw_zbuf_line(ZBuffer &buffer, unsigned int x0, unsigned int y0, double z0,
-                                 unsigned int x1, unsigned int y1, double z1, Color &color);
+                                 unsigned int x1, unsigned int y1, double z1, CustomColor &color);
 
              /**
               * \brief Draws a triangle using a Z-Buffer
               */
              void draw_zbuf_triag(ZBuffer &buffer, const Vector3D &a, const Vector3D &b, const Vector3D &c, double d, double dx, double dy,
-                                  const Color &ambientReflection, const Color &diffuseReflection, const Color &specularReflection, double reflectionCoeff, Lights3D &lights);
+                                  const CustomColor &ambientReflection, const CustomColor &diffuseReflection, const CustomColor &specularReflection, double reflectionCoeff, Lights3D &lights);
 
 		private:
 			friend std::istream& operator>>(std::istream& in, EasyImage & image);

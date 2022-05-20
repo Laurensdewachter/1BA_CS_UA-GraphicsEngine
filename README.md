@@ -26,10 +26,10 @@ X: Niet werkend of niet geïmplementeerd
 | 6   | 3D fractalen             | V      |
 |     | BuckyBall                | V      |
 |     | Mengerspons              | V      |
-|     | View Frustum             | -      |
+|     | View Frustum             | V      |
 | 7   | Ambient licht            | V      |
-|     | Diffuus licht (oneindig) |        |
-|     | Diffuus licht (puntbron) |        |
+|     | Diffuus licht (oneindig) | V      |
+|     | Diffuus licht (puntbron) | V      |
 |     | Speculair licht          |        |
 | 8   | Schaduw                  |        |
 |     | Texture mapping          |        |
@@ -40,7 +40,6 @@ X: Niet werkend of niet geïmplementeerd
 Geïmplementeerde vorm van texture mapping: ...
 
 ## Gekende problemen
-View Frustum: Mengerspons geeft onverwachte resultaten.
 
 ## Niet-gequoteerde functionaliteit
 
