@@ -503,44 +503,80 @@ void img::EasyImage::draw_zbuf_triag(ZBuffer &buffer, const Vector3D &a, const V
 
                 CustomColor secondColor(color);
                 for (auto curLight : lights) {
-                    if (curLight->getType() != 'P') continue;
+                    if (curLight->getType() == 'L') continue;
+                    if (curLight->getType() == 'P') {
+                        auto pointLight = (PointLight *) curLight;
+                        Vector3D location = pointLight->location;
+                        double spotAngle = pointLight->spotAngle * M_PI / 180.0;
 
-                    auto pointLight = (PointLight*) curLight;
-                    Vector3D location = pointLight->location;
-                    double spotAngle = pointLight->spotAngle*M_PI/180.0;
+                        Vector3D n = Vector3D::vector(w1, w2, w3);
+                        if (k > 0) n = -n;
+                        n.normalise();
 
-                    Vector3D n = Vector3D::vector(w1, w2, w3);
-                    if (k > 0) n = -n;
-                    n.normalise();
+                        double z = 1.0 / new_z_value;
+                        double x = -z * (i - dx) / d;
+                        double y = -z * (yi - dy) / d;
+                        Vector3D l = location - Vector3D::point(x, y, z);
+                        l.normalise();
 
-                    double z = 1.0/new_z_value;
-                    double x = -z*(i-dx)/d;
-                    double y = -z*(yi-dy)/d;
-                    Vector3D l = location - Vector3D::point(x, y, z);
-                    l.normalise();
+                        double dot = l.dot(n);
+                        if (dot > cos(spotAngle)) {
+                            double angleValue = 1 - ((1 - dot) / (1 - cos(spotAngle)));
+                            secondColor.red += curLight->diffuseLight.red * diffuseReflection.red * angleValue;
+                            secondColor.green += curLight->diffuseLight.green * diffuseReflection.green * angleValue;
+                            secondColor.blue += curLight->diffuseLight.blue * diffuseReflection.blue * angleValue;
 
-                    double dot = l.dot(n);
-                    if (dot > cos(spotAngle)) {
-                        double angleValue = 1 - ((1 - dot) / (1 - cos(spotAngle)));
-                        secondColor.red += curLight->diffuseLight.red * diffuseReflection.red * angleValue;
-                        secondColor.green += curLight->diffuseLight.green * diffuseReflection.green * angleValue;
-                        secondColor.blue += curLight->diffuseLight.blue * diffuseReflection.blue * angleValue;
+                            if (secondColor.red > 1) secondColor.red = 1;
+                            if (secondColor.green > 1) secondColor.green = 1;
+                            if (secondColor.blue > 1) secondColor.blue = 1;
+                        }
 
-                        if (secondColor.red > 1) secondColor.red = 1;
-                        if (secondColor.green > 1) secondColor.green = 1;
-                        if (secondColor.blue > 1) secondColor.blue = 1;
+                        if (curLight->specularLight.red != 0 || curLight->specularLight.green != 0 || curLight->specularLight.blue != 0) {
+                            Vector3D p = Vector3D::vector(-x, -y, -z);
+                            p.normalise();
+
+                            Vector3D r = 2 * n * dot - l;
+                            r.normalise();
+
+                            double beta = p.dot(r);
+                            if (beta > 0) {
+                                secondColor.red += curLight->diffuseLight.red * specularReflection.red * std::pow(beta, reflectionCoeff);
+                                secondColor.green += curLight->diffuseLight.green * specularReflection.green * std::pow(beta, reflectionCoeff);
+                                secondColor.blue += curLight->diffuseLight.blue * specularReflection.blue * std::pow(beta, reflectionCoeff);
+
+                                if (secondColor.red > 1) secondColor.red = 1;
+                                if (secondColor.green > 1) secondColor.green = 1;
+                                if (secondColor.blue > 1) secondColor.blue = 1;
+                            }
+                        }
                     }
-                    if (curLight->specularLight.red != 0 || curLight->specularLight.green != 0 || curLight->specularLight.blue != 0) {
+                    else if (curLight->specularLight.red != 0 || curLight->specularLight.green != 0 || curLight->specularLight.blue != 0) {
+                        auto infLight = (InfLight*) curLight;
+                        Vector3D l = infLight->ldVector;
+                        l.normalise();
+                        l = -l;
+
+                        double z = 1.0 / new_z_value;
+                        double x = -z * (i - dx) / d;
+                        double y = -z * (yi - dy) / d;
+
                         Vector3D p = Vector3D::vector(-x, -y, -z);
                         p.normalise();
 
+                        Vector3D n = Vector3D::vector(w1, w2, w3);
+                        if (k > 0) n = -n;
+                        n.normalise();
+
+                        double dot = l.dot(n);
+
                         Vector3D r = 2 * n * dot - l;
+                        r.normalise();
 
                         double beta = p.dot(r);
                         if (beta > 0) {
-                            secondColor.red += curLight->diffuseLight.red * diffuseReflection.red * std::pow(beta, reflectionCoeff);
-                            secondColor.green += curLight->diffuseLight.green * diffuseReflection.green * std::pow(beta, reflectionCoeff);
-                            secondColor.blue += curLight->diffuseLight.blue * diffuseReflection.blue * std::pow(beta, reflectionCoeff);
+                            secondColor.red += curLight->diffuseLight.red * specularReflection.red * std::pow(beta, reflectionCoeff);
+                            secondColor.green += curLight->diffuseLight.green * specularReflection.green * std::pow(beta, reflectionCoeff);
+                            secondColor.blue += curLight->diffuseLight.blue * specularReflection.blue * std::pow(beta, reflectionCoeff);
 
                             if (secondColor.red > 1) secondColor.red = 1;
                             if (secondColor.green > 1) secondColor.green = 1;

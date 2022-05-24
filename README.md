@@ -30,7 +30,7 @@ X: Niet werkend of niet geïmplementeerd
 | 7   | Ambient licht            | V      |
 |     | Diffuus licht (oneindig) | V      |
 |     | Diffuus licht (puntbron) | V      |
-|     | Speculair licht          |        |
+|     | Speculair licht          | V      |
 | 8   | Schaduw                  |        |
 |     | Texture mapping          |        |
 | 9   | Bollen en cylinders      |        |
