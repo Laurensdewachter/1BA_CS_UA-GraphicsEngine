@@ -26,7 +26,7 @@ X: Niet werkend of niet geïmplementeerd
 | 6   | 3D fractalen             | V      |
 |     | BuckyBall                | V      |
 |     | Mengerspons              | V      |
-|     | View Frustum             | -      |
+|     | View Frustum             | V      |
 | 7   | Ambient licht            | V      |
 |     | Diffuus licht (oneindig) | V      |
 |     | Diffuus licht (puntbron) | V      |
@@ -40,7 +40,6 @@ X: Niet werkend of niet geïmplementeerd
 Geïmplementeerde vorm van texture mapping: ...
 
 ## Gekende problemen
-Diffuus licht met clipping geeft onverwachte resultaten.
 
 ## Niet-gequoteerde functionaliteit
 

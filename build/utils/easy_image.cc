@@ -393,6 +393,7 @@ void img::EasyImage::draw_zbuf_triag(ZBuffer &buffer, const Vector3D &a, const V
         ambientRed += curLight->ambientLight.red * ambientReflection.red;
         ambientGreen += curLight->ambientLight.green * ambientReflection.green;
         ambientBlue += curLight->ambientLight.blue * ambientReflection.blue;
+
         if (ambientRed > 1) ambientRed = 1;
         if (ambientGreen > 1) ambientGreen = 1;
         if (ambientBlue > 1) ambientBlue = 1;
@@ -519,7 +520,7 @@ void img::EasyImage::draw_zbuf_triag(ZBuffer &buffer, const Vector3D &a, const V
                     l.normalise();
 
                     double dot = l.dot(n);
-                    if (dot > cos(spotAngle) && k < 0) {
+                    if (dot > cos(spotAngle)) {
                         double angleValue = 1 - ((1 - dot) / (1 - cos(spotAngle)));
                         secondColor.red += curLight->diffuseLight.red * diffuseReflection.red * angleValue;
                         secondColor.green += curLight->diffuseLight.green * diffuseReflection.green * angleValue;

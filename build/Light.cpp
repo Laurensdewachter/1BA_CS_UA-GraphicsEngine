@@ -51,7 +51,7 @@ img::EasyImage Light3D::lightedZBuffering(const ini::Configuration &configuratio
 
         std::vector<double> ambientLight = configuration[lightName]["ambientLight"].as_double_tuple_or_die();
         std::vector<double> diffuseLight;
-        std::vector<double> specularLight = configuration[lightName]["ambientLight"].as_double_tuple_or_default({0, 0, 0});
+        std::vector<double> specularLight = configuration[lightName]["specularLight"].as_double_tuple_or_default({0, 0, 0});
 
         if (configuration[lightName]["diffuseLight"].as_double_tuple_if_exists(diffuseLight)) {
             bool inf = configuration[lightName]["infinity"].as_bool_or_die();
