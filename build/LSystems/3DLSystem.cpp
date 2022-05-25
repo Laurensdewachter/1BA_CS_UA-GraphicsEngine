@@ -6,14 +6,21 @@
 #include <cmath>
 #include <stack>
 
-Figure LSystem3D::LSystem3D(const ini::Configuration &configuration, const std::string &figureName, Matrix &V) {
+Figure LSystem3D::LSystem3D(const ini::Configuration &configuration, const std::string &figureName, Matrix &V, bool transform, bool light) {
     const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
     const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
     const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
     const double scale = configuration[figureName]["scale"].as_double_or_die();
-    std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
-    std::vector<double> color = configuration[figureName]["color"].as_double_tuple_or_die();
+    std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();;
     const std::string inputfile = configuration[figureName]["inputfile"].as_string_or_die();
+    std::vector<double> ambientReflection;
+    if (light) {
+        ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    }
+    else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
+    std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
+    std::vector<double> specularReflection = configuration[figureName]["specularReflection"].as_double_tuple_or_default({0, 0, 0});
+    const double reflectionCoefficient = configuration[figureName]["reflectionCoefficient"].as_double_or_default(0);
 
     LParser::LSystem3D l_system;
     std::ifstream input_stream(inputfile);
@@ -45,7 +52,10 @@ Figure LSystem3D::LSystem3D(const ini::Configuration &configuration, const std::
 
     Figure fig;
 
-    fig.ambientReflection = CustomColor(color[0], color[1], color[2]);
+    fig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
+    fig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+    fig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+    fig.reflectionCoefficient = reflectionCoefficient;
 
     fig.points.push_back(curPoint);
     int indexCounter = 0;
@@ -67,49 +77,107 @@ Figure LSystem3D::LSystem3D(const ini::Configuration &configuration, const std::
         initiator = replacement;
     }
 
-    for (auto i : initiator) {
+    std::vector<Vector3D> toAdd;
+    for (unsigned int k = 0; k < initiator.length(); k++) {
+        char i = initiator[k];
         if (i == '+') {
+            if (!toAdd.empty()) {
+                fig.points.push_back(toAdd[toAdd.size()-1]);
+                indexCounter++;
+                Face newFace({indexCounter, indexCounter-1});
+                fig.faces.push_back(newFace);
+                toAdd.clear();
+            }
             Vector3D tempH(H);
             H = (H*cos(angle)) + (L*sin(angle));
             L = (L*cos(angle)) - (tempH*sin(angle));
             continue;
         }
         if (i == '-') {
+            if (!toAdd.empty()) {
+                fig.points.push_back(toAdd[toAdd.size()-1]);
+                indexCounter++;
+                Face newFace({indexCounter, indexCounter-1});
+                fig.faces.push_back(newFace);
+                toAdd.clear();
+            }
             Vector3D tempH(H);
             H = (H*cos(-angle)) + (L*sin(-angle));
             L = (L*cos(-angle)) - (tempH*sin(-angle));
             continue;
         }
         if (i == '^') {
+            if (!toAdd.empty()) {
+                fig.points.push_back(toAdd[toAdd.size()-1]);
+                indexCounter++;
+                Face newFace({indexCounter, indexCounter-1});
+                fig.faces.push_back(newFace);
+                toAdd.clear();
+            }
             Vector3D tempH(H);
             H = (H*cos(angle)) + (U*sin(angle));
             U = (U*cos(angle)) - (tempH*sin(angle));
             continue;
         }
         if (i == '&') {
+            if (!toAdd.empty()) {
+                fig.points.push_back(toAdd[toAdd.size()-1]);
+                indexCounter++;
+                Face newFace({indexCounter, indexCounter-1});
+                fig.faces.push_back(newFace);
+                toAdd.clear();
+            }
             Vector3D tempH(H);
             H = (H*cos(-angle)) + (U*sin(-angle));
             U = (U*cos(-angle)) - (tempH*sin(-angle));
             continue;
         }
         if (i == '\\') {
+            if (!toAdd.empty()) {
+                fig.points.push_back(toAdd[toAdd.size()-1]);
+                indexCounter++;
+                Face newFace({indexCounter, indexCounter-1});
+                fig.faces.push_back(newFace);
+                toAdd.clear();
+            }
             Vector3D tempL(L);
             L = (L*cos(angle)) - (U*sin(angle));
             U = (tempL*sin(angle)) + (U*cos(angle));
             continue;
         }
         if (i == '/') {
+            if (!toAdd.empty()) {
+                fig.points.push_back(toAdd[toAdd.size()-1]);
+                indexCounter++;
+                Face newFace({indexCounter, indexCounter-1});
+                fig.faces.push_back(newFace);
+                toAdd.clear();
+            }
             Vector3D tempL(L);
             L = (L*cos(-angle)) - (U*sin(-angle));
             U = (tempL*sin(-angle)) + (U*cos(-angle));
             continue;
         }
         if (i == '|') {
+            if (!toAdd.empty()) {
+                fig.points.push_back(toAdd[toAdd.size()-1]);
+                indexCounter++;
+                Face newFace({indexCounter, indexCounter-1});
+                fig.faces.push_back(newFace);
+                toAdd.clear();
+            }
             H = -H;
             L = -L;
             continue;
         }
         if (i == '(') {
+            if (!toAdd.empty()) {
+                fig.points.push_back(toAdd[toAdd.size()-1]);
+                indexCounter++;
+                Face newFace({indexCounter, indexCounter-1});
+                fig.faces.push_back(newFace);
+                toAdd.clear();
+            }
             pointStack.push(curPoint);
             HStack.push(H);
             LStack.push(L);
@@ -117,6 +185,13 @@ Figure LSystem3D::LSystem3D(const ini::Configuration &configuration, const std::
             continue;
         }
         if (i == ')') {
+            if (!toAdd.empty()) {
+                fig.points.push_back(toAdd[toAdd.size()-1]);
+                indexCounter++;
+                Face newFace({indexCounter, indexCounter-1});
+                fig.faces.push_back(newFace);
+                toAdd.clear();
+            }
             curPoint = pointStack.top();
             pointStack.pop();
             H = HStack.top();
@@ -131,11 +206,15 @@ Figure LSystem3D::LSystem3D(const ini::Configuration &configuration, const std::
             continue;
         }
         curPoint += H;
-        fig.points.push_back(curPoint);
-        indexCounter++;
-        if (draw[i]) {
-            Face newFace({indexCounter, indexCounter-1});
-            fig.faces.push_back(newFace);
+        if (draw[i]) toAdd.push_back(curPoint);
+        else {
+            if (!toAdd.empty()) {
+                fig.points.push_back(toAdd[toAdd.size()-1]);
+                indexCounter++;
+                Face newFace({indexCounter, indexCounter-1});
+                fig.faces.push_back(newFace);
+                toAdd.clear();
+            }
         }
     }
 
@@ -147,7 +226,7 @@ Figure LSystem3D::LSystem3D(const ini::Configuration &configuration, const std::
 
     Matrix F = S * rX * rY * rZ * T * V;
 
-    Transformation::applyTransformation(fig, F);
+    if (transform) Transformation::applyTransformation(fig, F);
 
     return fig;
 }

@@ -70,6 +70,14 @@ img::EasyImage Triangles3D::zBuffer(const ini::Configuration &configuration) {
         else if (type == "BuckyBall") currentFigs.push_back(createBuckyBall(configuration, figureName, V));
         else if (type == "FractalBuckyBall") currentFigs = createFractalBuckyBall(configuration, figureName, V);
         else if (type == "MengerSponge") currentFigs = createMengerSponge(configuration, figureName, V);
+        else if (type == "ThickLineDrawing") currentFigs = createThickEyeFigure(configuration, figureName, V);
+        else if (type == "ThickCube") currentFigs = createThickCube(configuration, figureName, V);
+        else if (type == "ThickTetrahedron") currentFigs = createThickTetrahedron(configuration, figureName, V);
+        else if (type == "ThickOctahedron") currentFigs = createThickOctahedron(configuration, figureName, V);
+        else if (type == "ThickIcosahedron") currentFigs = createThickIcosahedron(configuration, figureName, V);
+        else if (type == "ThickDodecahedron") currentFigs = createThickDodecahedron(configuration, figureName, V);
+        else if (type == "Thick3DLSystem") currentFigs = createThick3DLSystem(configuration, figureName, V);
+        else if (type == "ThickBuckyBall") currentFigs = createThickBuckyBall(configuration, figureName, V);
 
         for (auto &currentFig : currentFigs) {
             Utils::triangulate(currentFig);

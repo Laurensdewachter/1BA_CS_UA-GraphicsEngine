@@ -61,7 +61,7 @@ Lines2D doProjectionConst(const Figures3D &figs) {
     return lines;
 }
 
-Figure eyeFigure(const ini::Configuration &configuration, std::string &figureName, Matrix &V) {
+Figure createEyeFigure(const ini::Configuration &configuration, std::string &figureName, Matrix &V) {
     const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
     const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
     const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
@@ -101,6 +101,108 @@ Figure eyeFigure(const ini::Configuration &configuration, std::string &figureNam
     Transformation::applyTransformation(fig, F);
 
     return fig;
+}
+
+Figures3D createThickEyeFigure(const ini::Configuration &configuration, std::string &figureName, Matrix &V, bool light) {
+    const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
+    const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
+    const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
+    const double scale = configuration[figureName]["scale"].as_double_or_die();
+    std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
+    const unsigned int nrPoints = configuration[figureName]["nrPoints"].as_int_or_die();
+    const unsigned int nrLines = configuration[figureName]["nrLines"].as_int_or_die();
+    std::vector<double> ambientReflection;
+    if (light) {
+        ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    }
+    else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
+    std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
+    std::vector<double> specularReflection = configuration[figureName]["specularReflection"].as_double_tuple_or_default({0, 0, 0});
+    const double reflectionCoefficient = configuration[figureName]["reflectionCoefficient"].as_double_or_default(0);
+    const double r = configuration[figureName]["radius"].as_double_or_die();
+    const unsigned int n = configuration[figureName]["n"].as_int_or_die();
+    const unsigned int m = configuration[figureName]["m"].as_int_or_die();
+
+    Matrix S = Transformation::scaleFigure(scale);
+    Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
+    Matrix rY = Transformation::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = Transformation::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = Transformation::translate(Vector3D::point(center[0], center[1], center[2]));
+
+    Matrix F = S * rX * rY * rZ * T * V;
+
+    Figure fig;
+
+    for (unsigned int j = 0; j < nrPoints; j++) {
+        std::string pointName = "point" + std::to_string(j);
+
+        std::vector<double> point_vec = configuration[figureName][pointName].as_double_tuple_or_die();
+        fig.points.push_back(Vector3D::point(point_vec[0], point_vec[1], point_vec[2]));
+    }
+
+    for (unsigned int j = 0; j < nrLines; j++) {
+        std::string lineName = "line" + std::to_string(j);
+
+        std::vector<int> line_vec = configuration[figureName][lineName].as_int_tuple_or_die();
+        Face f(line_vec);
+        fig.faces.push_back(f);
+    }
+
+    Figures3D thickFigs = generateThickFigures(fig, r, n, m);
+    for (auto &curFig : thickFigs) {
+        curFig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
+        curFig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+        curFig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+        curFig.reflectionCoefficient = reflectionCoefficient;
+        Transformation::applyTransformation(curFig, F);
+    }
+
+    return thickFigs;
+}
+
+Figures3D generateThickFigures(Figure &fig, double r, unsigned int n, unsigned int m) {
+    Figures3D result;
+    for (auto &curFace : fig.faces) {
+        for (auto curIndex : curFace.point_indexes) {
+            Figure sphere = PlatonicBodies::getIcosahedronFigure();
+            for (unsigned int i = 0; i < m; i++) Utils::splitTriangles(sphere);
+            for (auto & point : sphere.points) point.normalise();
+            Vector3D p = Vector3D::vector(fig.points[curIndex].x, fig.points[curIndex].y, fig.points[curIndex].z);
+            Matrix T = Transformation::translate(p);
+            Matrix S = Transformation::scaleFigure(r);
+            Matrix F = S * T;
+            Transformation::applyTransformation(sphere, F);
+            result.push_back(sphere);
+        }
+        for (unsigned int i = 0; i < curFace.point_indexes.size(); i++) {
+            Vector3D point1;
+            Vector3D point2;
+            if (i == curFace.point_indexes.size()-1) {
+                point1 = fig.points[curFace.point_indexes[i]];
+                point2 = fig.points[curFace.point_indexes[0]];
+            } else {
+                point1 = fig.points[curFace.point_indexes[i]];
+                point2 = fig.points[curFace.point_indexes[i+1]];
+            }
+            Vector3D vec = point2 - point1;
+            double len = vec.length();
+            double height = len/r;
+
+            Figure cylinder = createLineCylinder((int) n, height);
+
+            Matrix S = Transformation::scaleFigure(r);
+            double theta, phi, rt;
+            Utils::toPolar(vec, theta, phi, rt);
+            Matrix R1 = Transformation::rotateY(phi);
+            Matrix R2 = Transformation::rotateZ(theta);
+            Matrix T = Transformation::translate(point1);
+            Matrix F = S * R1 * R2 * T;
+            Transformation::applyTransformation(cylinder, F);
+            result.push_back(cylinder);
+        }
+    }
+
+    return result;
 }
 
 Figure createCube(const ini::Configuration &configuration, std::string &figureName, Matrix &V, bool light) {
@@ -180,6 +282,48 @@ Figures3D createFractalCube(const ini::Configuration &configuration, std::string
     return fractalFigs;
 }
 
+Figures3D createThickCube(const ini::Configuration &configuration, std::string &figureName, Matrix &V, bool light) {
+    const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
+    const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
+    const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
+    const double scale = configuration[figureName]["scale"].as_double_or_die();
+    std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
+    std::vector<double> ambientReflection;
+    if (light) {
+        ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    }
+    else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
+    std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
+    std::vector<double> specularReflection = configuration[figureName]["specularReflection"].as_double_tuple_or_default({0, 0, 0});
+    const double reflectionCoefficient = configuration[figureName]["reflectionCoefficient"].as_double_or_default(0);
+    const double r = configuration[figureName]["radius"].as_double_or_die();
+    const unsigned int n = configuration[figureName]["n"].as_int_or_die();
+    const unsigned int m = configuration[figureName]["m"].as_int_or_die();
+
+
+    Matrix S = Transformation::scaleFigure(scale);
+    Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
+    Matrix rY = Transformation::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = Transformation::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = Transformation::translate(Vector3D::point(center[0], center[1], center[2]));
+
+    Matrix F = S * rX * rY * rZ * T * V;
+
+    Figure fig = PlatonicBodies::getCubeFigure();
+
+    Figures3D thickFigs = generateThickFigures(fig, r, n, m);
+
+    for (auto &curFig : thickFigs) {
+        curFig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
+        curFig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+        curFig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+        curFig.reflectionCoefficient = reflectionCoefficient;
+        Transformation::applyTransformation(curFig, F);
+    }
+
+    return thickFigs;
+}
+
 Figure createTetrahedron(const ini::Configuration &configuration, std::string &figureName, Matrix &V, bool light) {
     const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
     const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
@@ -255,6 +399,48 @@ Figures3D createFractalTetrahedron(const ini::Configuration &configuration, std:
     }
 
     return fractalFigs;
+}
+
+Figures3D createThickTetrahedron(const ini::Configuration &configuration, std::string &figureName, Matrix &V, bool light) {
+    const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
+    const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
+    const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
+    const double scale = configuration[figureName]["scale"].as_double_or_die();
+    std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
+    std::vector<double> ambientReflection;
+    if (light) {
+        ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    }
+    else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
+    std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
+    std::vector<double> specularReflection = configuration[figureName]["specularReflection"].as_double_tuple_or_default({0, 0, 0});
+    const double reflectionCoefficient = configuration[figureName]["reflectionCoefficient"].as_double_or_default(0);
+    const double r = configuration[figureName]["radius"].as_double_or_die();
+    const unsigned int n = configuration[figureName]["n"].as_int_or_die();
+    const unsigned int m = configuration[figureName]["m"].as_int_or_die();
+
+
+    Matrix S = Transformation::scaleFigure(scale);
+    Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
+    Matrix rY = Transformation::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = Transformation::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = Transformation::translate(Vector3D::point(center[0], center[1], center[2]));
+
+    Matrix F = S * rX * rY * rZ * T * V;
+
+    Figure fig = PlatonicBodies::getTetrahedronFigure();
+
+    Figures3D thickFigs = generateThickFigures(fig, r, n, m);
+
+    for (auto &curFig : thickFigs) {
+        curFig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
+        curFig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+        curFig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+        curFig.reflectionCoefficient = reflectionCoefficient;
+        Transformation::applyTransformation(curFig, F);
+    }
+
+    return thickFigs;
 }
 
 Figure createOctahedron(const ini::Configuration &configuration, std::string &figureName, Matrix &V, bool light) {
@@ -334,6 +520,48 @@ Figures3D createFractalOctahedron(const ini::Configuration &configuration, std::
     return fractalFigs;
 }
 
+Figures3D createThickOctahedron(const ini::Configuration &configuration, std::string &figureName, Matrix &V, bool light) {
+    const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
+    const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
+    const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
+    const double scale = configuration[figureName]["scale"].as_double_or_die();
+    std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
+    std::vector<double> ambientReflection;
+    if (light) {
+        ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    }
+    else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
+    std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
+    std::vector<double> specularReflection = configuration[figureName]["specularReflection"].as_double_tuple_or_default({0, 0, 0});
+    const double reflectionCoefficient = configuration[figureName]["reflectionCoefficient"].as_double_or_default(0);
+    const double r = configuration[figureName]["radius"].as_double_or_die();
+    const unsigned int n = configuration[figureName]["n"].as_int_or_die();
+    const unsigned int m = configuration[figureName]["m"].as_int_or_die();
+
+
+    Matrix S = Transformation::scaleFigure(scale);
+    Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
+    Matrix rY = Transformation::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = Transformation::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = Transformation::translate(Vector3D::point(center[0], center[1], center[2]));
+
+    Matrix F = S * rX * rY * rZ * T * V;
+
+    Figure fig = PlatonicBodies::getOctahedronFigure();
+
+    Figures3D thickFigs = generateThickFigures(fig, r, n, m);
+
+    for (auto &curFig : thickFigs) {
+        curFig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
+        curFig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+        curFig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+        curFig.reflectionCoefficient = reflectionCoefficient;
+        Transformation::applyTransformation(curFig, F);
+    }
+
+    return thickFigs;
+}
+
 Figure createIcosahedron(const ini::Configuration &configuration, std::string &figureName, Matrix &V, bool light) {
     const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
     const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
@@ -411,6 +639,48 @@ Figures3D createFractalIcosahedron(const ini::Configuration &configuration, std:
     return fractalFigs;
 }
 
+Figures3D createThickIcosahedron(const ini::Configuration &configuration, std::string &figureName, Matrix &V, bool light) {
+    const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
+    const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
+    const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
+    const double scale = configuration[figureName]["scale"].as_double_or_die();
+    std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
+    std::vector<double> ambientReflection;
+    if (light) {
+        ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    }
+    else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
+    std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
+    std::vector<double> specularReflection = configuration[figureName]["specularReflection"].as_double_tuple_or_default({0, 0, 0});
+    const double reflectionCoefficient = configuration[figureName]["reflectionCoefficient"].as_double_or_default(0);
+    const double r = configuration[figureName]["radius"].as_double_or_die();
+    const unsigned int n = configuration[figureName]["n"].as_int_or_die();
+    const unsigned int m = configuration[figureName]["m"].as_int_or_die();
+
+
+    Matrix S = Transformation::scaleFigure(scale);
+    Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
+    Matrix rY = Transformation::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = Transformation::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = Transformation::translate(Vector3D::point(center[0], center[1], center[2]));
+
+    Matrix F = S * rX * rY * rZ * T * V;
+
+    Figure fig = PlatonicBodies::getIcosahedronFigure();
+
+    Figures3D thickFigs = generateThickFigures(fig, r, n, m);
+
+    for (auto &curFig : thickFigs) {
+        curFig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
+        curFig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+        curFig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+        curFig.reflectionCoefficient = reflectionCoefficient;
+        Transformation::applyTransformation(curFig, F);
+    }
+
+    return thickFigs;
+}
+
 Figure createDodecahedron(const ini::Configuration &configuration, std::string &figureName, Matrix &V, bool light) {
     const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
     const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
@@ -486,6 +756,48 @@ Figures3D createFractalDodecahedron(const ini::Configuration &configuration, std
     }
 
     return fractalFigs;
+}
+
+Figures3D createThickDodecahedron(const ini::Configuration &configuration, std::string &figureName, Matrix &V, bool light) {
+    const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
+    const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
+    const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
+    const double scale = configuration[figureName]["scale"].as_double_or_die();
+    std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
+    std::vector<double> ambientReflection;
+    if (light) {
+        ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    }
+    else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
+    std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
+    std::vector<double> specularReflection = configuration[figureName]["specularReflection"].as_double_tuple_or_default({0, 0, 0});
+    const double reflectionCoefficient = configuration[figureName]["reflectionCoefficient"].as_double_or_default(0);
+    const double r = configuration[figureName]["radius"].as_double_or_die();
+    const unsigned int n = configuration[figureName]["n"].as_int_or_die();
+    const unsigned int m = configuration[figureName]["m"].as_int_or_die();
+
+
+    Matrix S = Transformation::scaleFigure(scale);
+    Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
+    Matrix rY = Transformation::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = Transformation::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = Transformation::translate(Vector3D::point(center[0], center[1], center[2]));
+
+    Matrix F = S * rX * rY * rZ * T * V;
+
+    Figure fig = PlatonicBodies::getDodecahedronFigure();
+
+    Figures3D thickFigs = generateThickFigures(fig, r, n, m);
+
+    for (auto &curFig : thickFigs) {
+        curFig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
+        curFig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+        curFig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+        curFig.reflectionCoefficient = reflectionCoefficient;
+        Transformation::applyTransformation(curFig, F);
+    }
+
+    return thickFigs;
 }
 
 Figure createSphere(const ini::Configuration &configuration, std::string &figureName, Matrix &V, bool light) {
@@ -639,6 +951,26 @@ Figure createCylinder(const ini::Configuration &configuration, std::string &figu
     return fig;
 }
 
+Figure createLineCylinder(const int n, const double height) {
+    Figure fig;
+
+    for (int i = 0; i < n; i++) {
+        fig.points.push_back(Vector3D::point(cos((2*M_PI*i)/n), sin((2*M_PI*i)/n), 0));
+    }
+    for (int i = 0; i < n; i++) {
+        fig.points.push_back(Vector3D::point(cos((2*M_PI*i)/n), sin((2*M_PI*i)/n), height));
+    }
+
+    for (int i = 0; i < n-1; i++) {
+        Face face({i, (i+1)%n, (i+n+1)%(2*n), n+i});
+        fig.faces.push_back(face);
+    }
+    Face lastSquare({n-1, 0, n, (2*n)-1});
+    fig.faces.push_back(lastSquare);
+
+    return fig;
+}
+
 Figure createTorus(const ini::Configuration &configuration, std::string &figureName, Matrix &V, bool light) {
     const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
     const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
@@ -775,6 +1107,48 @@ Figures3D createFractalBuckyBall(const ini::Configuration &configuration, std::s
     return fractalFigs;
 }
 
+Figures3D createThickBuckyBall(const ini::Configuration &configuration, std::string &figureName, Matrix &V, bool light) {
+    const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
+    const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
+    const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
+    const double scale = configuration[figureName]["scale"].as_double_or_die();
+    std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
+    std::vector<double> ambientReflection;
+    if (light) {
+        ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    }
+    else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
+    std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
+    std::vector<double> specularReflection = configuration[figureName]["specularReflection"].as_double_tuple_or_default({0, 0, 0});
+    const double reflectionCoefficient = configuration[figureName]["reflectionCoefficient"].as_double_or_default(0);
+    const double r = configuration[figureName]["radius"].as_double_or_die();
+    const unsigned int n = configuration[figureName]["n"].as_int_or_die();
+    const unsigned int m = configuration[figureName]["m"].as_int_or_die();
+
+
+    Matrix S = Transformation::scaleFigure(scale);
+    Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
+    Matrix rY = Transformation::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = Transformation::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = Transformation::translate(Vector3D::point(center[0], center[1], center[2]));
+
+    Matrix F = S * rX * rY * rZ * T * V;
+
+    Figure fig = PlatonicBodies::getBuckyBall();
+
+    Figures3D thickFigs = generateThickFigures(fig, r, n, m);
+
+    for (auto &curFig : thickFigs) {
+        curFig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
+        curFig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+        curFig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+        curFig.reflectionCoefficient = reflectionCoefficient;
+        Transformation::applyTransformation(curFig, F);
+    }
+
+    return thickFigs;
+}
+
 Figures3D createMengerSponge(const ini::Configuration &configuration, std::string &figureName, Matrix &V, bool light) {
     const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
     const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
@@ -816,6 +1190,47 @@ Figures3D createMengerSponge(const ini::Configuration &configuration, std::strin
     return fractalFigs;
 }
 
+Figures3D createThick3DLSystem(const ini::Configuration &configuration, std::string &figureName, Matrix &V, bool light) {
+    const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
+    const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
+    const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
+    const double scale = configuration[figureName]["scale"].as_double_or_die();
+    std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
+    std::vector<double> ambientReflection;
+    if (light) {
+        ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    }
+    else ambientReflection = configuration[figureName]["color"].as_double_tuple_or_die();
+    std::vector<double> diffuseReflection = configuration[figureName]["diffuseReflection"].as_double_tuple_or_default({0, 0, 0});
+    std::vector<double> specularReflection = configuration[figureName]["specularReflection"].as_double_tuple_or_default({0, 0, 0});
+    const double reflectionCoefficient = configuration[figureName]["reflectionCoefficient"].as_double_or_default(0);
+    const double r = configuration[figureName]["radius"].as_double_or_die();
+    const unsigned int n = configuration[figureName]["n"].as_int_or_die();
+    const unsigned int m = configuration[figureName]["m"].as_int_or_die();
+
+    Matrix S = Transformation::scaleFigure(scale);
+    Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
+    Matrix rY = Transformation::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = Transformation::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = Transformation::translate(Vector3D::point(center[0], center[1], center[2]));
+
+    Matrix F = S * rX * rY * rZ * T * V;
+
+    Figure fig = LSystem3D::LSystem3D(configuration, figureName, V, false, light);
+
+    Figures3D thickFigs = generateThickFigures(fig, r, n, m);
+
+    for (auto &curFig : thickFigs) {
+        curFig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
+        curFig.diffuseReflection = CustomColor(diffuseReflection[0], diffuseReflection[1], diffuseReflection[2]);
+        curFig.specularReflection = CustomColor(specularReflection[0], specularReflection[1], specularReflection[2]);
+        curFig.reflectionCoefficient = reflectionCoefficient;
+        Transformation::applyTransformation(curFig, F);
+    }
+
+    return thickFigs;
+}
+
 img::EasyImage Lines3D::wireframe(const ini::Configuration &configuration, bool zBuffer) {
     Figures3D figures;
 
@@ -833,7 +1248,7 @@ img::EasyImage Lines3D::wireframe(const ini::Configuration &configuration, bool 
 
         std::string type = configuration[figureName]["type"].as_string_or_die();
 
-        if (type == "LineDrawing") currentFigs = {eyeFigure(configuration, figureName, V)};
+        if (type == "LineDrawing") currentFigs = {createEyeFigure(configuration, figureName, V)};
         else if (type == "Cube") currentFigs = {createCube(configuration, figureName, V)};
         else if (type == "Tetrahedron") currentFigs = {createTetrahedron(configuration, figureName, V)};
         else if (type == "Octahedron") currentFigs = {createOctahedron(configuration, figureName, V)};
@@ -852,6 +1267,14 @@ img::EasyImage Lines3D::wireframe(const ini::Configuration &configuration, bool 
         else if (type == "BuckyBall") currentFigs = {createBuckyBall(configuration, figureName, V)};
         else if (type == "FractalBuckyBall") currentFigs = createFractalBuckyBall(configuration, figureName, V);
         else if (type == "MengerSponge") currentFigs = createMengerSponge(configuration, figureName, V);
+        else if (type == "ThickLineDrawing") currentFigs = createThickEyeFigure(configuration, figureName, V);
+        else if (type == "ThickCube") currentFigs = createThickCube(configuration, figureName, V);
+        else if (type == "ThickTetrahedron") currentFigs = createThickTetrahedron(configuration, figureName, V);
+        else if (type == "ThickOctahedron") currentFigs = createThickOctahedron(configuration, figureName, V);
+        else if (type == "ThickIcosahedron") currentFigs = createThickIcosahedron(configuration, figureName, V);
+        else if (type == "ThickDodecahedron") currentFigs = createThickDodecahedron(configuration, figureName, V);
+        else if (type == "Thick3DLSystem") currentFigs = createThick3DLSystem(configuration, figureName, V);
+        else if (type == "ThickBuckyBall") currentFigs = createThickBuckyBall(configuration, figureName, V);
 
         for (auto &curFig : currentFigs) figures.push_back(curFig);
     }

@@ -114,6 +114,14 @@ img::EasyImage Light3D::lightedZBuffering(const ini::Configuration &configuratio
         else if (type == "BuckyBall") currentFigs.push_back(createBuckyBall(configuration, figureName, V, true));
         else if (type == "FractalBuckyBall") currentFigs = createFractalBuckyBall(configuration, figureName, V, true);
         else if (type == "MengerSponge") currentFigs = createMengerSponge(configuration, figureName, V, true);
+        else if (type == "ThickLineDrawing") currentFigs = createThickEyeFigure(configuration, figureName, V, true);
+        else if (type == "ThickCube") currentFigs = createThickCube(configuration, figureName, V, true);
+        else if (type == "ThickTetrahedron") currentFigs = createThickTetrahedron(configuration, figureName, V, true);
+        else if (type == "ThickOctahedron") currentFigs = createThickOctahedron(configuration, figureName, V, true);
+        else if (type == "ThickIcosahedron") currentFigs = createThickIcosahedron(configuration, figureName, V, true);
+        else if (type == "ThickDodecahedron") currentFigs = createThickDodecahedron(configuration, figureName, V, true);
+        else if (type == "Thick3DLSystem") currentFigs = createThick3DLSystem(configuration, figureName, V, true);
+        else if (type == "ThickBuckyBall") currentFigs = createThickBuckyBall(configuration, figureName, V, true);
 
         for (auto &currentFig : currentFigs) {
             Utils::triangulate(currentFig);

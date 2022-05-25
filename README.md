@@ -33,7 +33,7 @@ X: Niet werkend of niet geïmplementeerd
 |     | Speculair licht          | V      |
 | 8   | Schaduw                  |        |
 |     | Texture mapping          |        |
-| 9   | Bollen en cylinders      |        |
+| 9   | Bollen en cylinders      | V      |
 |     | UV-coordinaten           |        |
 |     | Cube mapping             |        |
 

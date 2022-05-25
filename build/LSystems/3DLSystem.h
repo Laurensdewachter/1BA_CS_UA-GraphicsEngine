@@ -6,7 +6,7 @@
 #include "../utils/vector3d.h"
 
 namespace LSystem3D {
-    Figure LSystem3D(const ini::Configuration &configuration, const std::string &figureName, Matrix &V);
+    Figure LSystem3D(const ini::Configuration &configuration, const std::string &figureName, Matrix &V, bool transform = true, bool light = false);
 }
 
 #endif
