@@ -1231,6 +1231,50 @@ Figures3D createThick3DLSystem(const ini::Configuration &configuration, std::str
     return thickFigs;
 }
 
+Figure createRoad(const ini::Configuration &configuration, std::string &figureName, Matrix &V) {
+    const double rotateX = configuration[figureName]["rotateX"].as_double_or_die();
+    const double rotateY = configuration[figureName]["rotateY"].as_double_or_die();
+    const double rotateZ = configuration[figureName]["rotateZ"].as_double_or_die();
+    const double scale = configuration[figureName]["scale"].as_double_or_die();
+    std::vector<double> center = configuration[figureName]["center"].as_double_tuple_or_die();
+    std::vector<double> ambientReflection = configuration[figureName]["ambientReflection"].as_double_tuple_or_die();
+    const double length = configuration[figureName]["length"].as_double_or_die();
+
+    Matrix S = Transformation::scaleFigure(scale);
+    Matrix rX = Transformation::rotateX((rotateX*M_PI)/180);
+    Matrix rY = Transformation::rotateY((rotateY*M_PI)/180);
+    Matrix rZ = Transformation::rotateZ((rotateZ*M_PI)/180);
+    Matrix T = Transformation::translate(Vector3D::point(center[0], center[1], center[2]));
+
+    Matrix F = S * rX * rY * rZ * T * V;
+
+    double roadLength = length/2;
+    Figure fig;
+    fig.points = {Vector3D::point(-roadLength, 2, 0),
+                  Vector3D::point(-roadLength, 0, 0),
+                  Vector3D::point(-roadLength, 2, 5),
+                  Vector3D::point(-roadLength, 0, 5),
+                  Vector3D::point(roadLength, 2, 0),
+                  Vector3D::point(roadLength, 0, 0),
+                  Vector3D::point(roadLength, 2, 5),
+                  Vector3D::point(roadLength, 0, 5)};
+
+    Face face1({0, 2, 5, 4});
+    Face face2({2, 3, 5, 6});
+    Face face3({1, 3, 5, 7});
+    Face face4({0, 1, 7, 4});
+    Face face5({4, 5, 6, 7});
+    Face face6({0, 2, 3, 1});
+
+    fig.faces = {face1, face2, face3, face4, face5, face6};
+
+    fig.ambientReflection = CustomColor(ambientReflection[0], ambientReflection[1], ambientReflection[2]);
+
+    Transformation::applyTransformation(fig, F);
+
+    return fig;
+}
+
 img::EasyImage Lines3D::wireframe(const ini::Configuration &configuration, bool zBuffer) {
     Figures3D figures;
 

@@ -122,6 +122,7 @@ img::EasyImage Light3D::lightedZBuffering(const ini::Configuration &configuratio
         else if (type == "ThickDodecahedron") currentFigs = createThickDodecahedron(configuration, figureName, V, true);
         else if (type == "Thick3DLSystem") currentFigs = createThick3DLSystem(configuration, figureName, V, true);
         else if (type == "ThickBuckyBall") currentFigs = createThickBuckyBall(configuration, figureName, V, true);
+        else if (type == "Road") currentFigs = {createRoad(configuration, figureName, V)};
 
         for (auto &currentFig : currentFigs) {
             Utils::triangulate(currentFig);

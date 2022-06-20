@@ -59,6 +59,8 @@ Figures3D createMengerSponge(const ini::Configuration &configuration, std::strin
 
 Figures3D createThick3DLSystem(const ini::Configuration &configuration, std::string &figureName, Matrix &V, bool light = false);
 
+Figure createRoad(const ini::Configuration &configuration, std::string &figureName, Matrix &V);
+
 namespace Lines3D {
     img::EasyImage wireframe(const ini::Configuration &configuration, bool zBuffer);
 }
